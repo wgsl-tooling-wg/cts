@@ -187,6 +187,7 @@ app.get('/out/**/*.js', async (req, res, next) => {
 // Serve everything else (not .js) as static, and directories as directory listings.
 app.use('/out', serveIndex(path.resolve(srcDir, '../src')));
 app.use('/out', express.static(path.resolve(srcDir, '../src')));
+app.use('/wesl', express.static(path.resolve(srcDir, '../../tools/packages/wesl')));
 
 void (async () => {
   let host = '127.0.0.1';
@@ -211,12 +212,14 @@ void (async () => {
         for (const iface of Object.values(os.networkInterfaces())) {
           for (const details of iface || []) {
             if (details.family === 'IPv4') {
-              console.log(`  http://${details.address}:${port}/standalone/`);
+              console.log(
+                `  http://${details.address}:${port}/standalone/?q=webgpu:shader,validation,parse,*`
+              );
             }
           }
         }
       } else {
-        console.log(`  http://${host}:${port}/standalone/`);
+        console.log(`  http://${host}:${port}/standalone/?q=webgpu:shader,validation,parse,*`);
       }
     });
   });

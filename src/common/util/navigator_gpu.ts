@@ -3,6 +3,8 @@ import { TestCaseRecorder } from '../framework/fixture.js';
 import { globalTestConfig } from '../framework/test_config.js';
 
 import { ErrorWithExtra, assert, objectEquals } from './util.js';
+// @ts-ignore The dev server serves wesl at this location
+import { link } from '/wesl/dist/index.js';
 
 /**
  * Finds and returns the `navigator.gpu` object (or equivalent, for non-browser implementations).
@@ -70,6 +72,26 @@ export function getGPU(recorder: TestCaseRecorder | null): GPU {
   }
 
   impl = gpuProvider();
+
+  const weslEnabled = true;
+  if (weslEnabled) {
+    // eslint-disable-next-line @typescript-eslint/unbound-method
+    const origCreateShaderModule = GPUDevice.prototype.createShaderModule;
+    GPUDevice.prototype.createShaderModule = function (
+      descriptor: GPUShaderModuleDescriptor
+    ): GPUShaderModule {
+      const newCode = link({
+        weslSrc: { './main.wesl': descriptor.code },
+        rootModuleName: 'main',
+        config: {},
+      }).dest;
+      const result = origCreateShaderModule.call(this, {
+        ...descriptor,
+        code: newCode,
+      });
+      return result;
+    };
+  }
 
   if (globalTestConfig.enforceDefaultLimits) {
     // eslint-disable-next-line @typescript-eslint/unbound-method
