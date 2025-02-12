@@ -80,16 +80,43 @@ export function getGPU(recorder: TestCaseRecorder | null): GPU {
     GPUDevice.prototype.createShaderModule = function (
       descriptor: GPUShaderModuleDescriptor
     ): GPUShaderModule {
-      const newCode = link({
-        weslSrc: { './main.wesl': descriptor.code },
-        rootModuleName: 'main',
-        config: {},
-      }).dest;
-      const result = origCreateShaderModule.call(this, {
-        ...descriptor,
-        code: newCode,
-      });
-      return result;
+      try {
+        const newCode: string = link({
+          weslSrc: { './main.wesl': descriptor.code },
+          rootModuleName: 'main',
+          config: {},
+        }).dest;
+        const result = origCreateShaderModule.call(this, {
+          ...descriptor,
+          code: newCode,
+        });
+        return result;
+      } catch (e) {
+        // Linking fails whenever the CTS test purposefully is an "error test"
+        console.warn('Linking failed', e);
+        const brokenShaderModule = origCreateShaderModule.call(this, {
+          ...descriptor,
+          code: 'wesl_failed_to_parse',
+        });
+        brokenShaderModule.getCompilationInfo = function (): Promise<GPUCompilationInfo> {
+          return Promise.resolve({
+            __brand: 'GPUCompilationInfo',
+            messages: [
+              {
+                __brand: 'GPUCompilationMessage',
+                type: 'error',
+                message: '' + e,
+                // TODO: Properly set these
+                length: 0,
+                lineNum: 1,
+                linePos: 1,
+                offset: 0,
+              },
+            ],
+          });
+        };
+        return brokenShaderModule;
+      }
     };
   }
 
