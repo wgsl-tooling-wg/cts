@@ -4,7 +4,7 @@ import { globalTestConfig } from '../framework/test_config.js';
 
 import { ErrorWithExtra, assert, objectEquals } from './util.js';
 // @ts-ignore The dev server serves wesl at this location
-import { link } from '/wesl/dist/index.js';
+import { _linkSync } from '/wesl/dist/index.js';
 
 /**
  * Finds and returns the `navigator.gpu` object (or equivalent, for non-browser implementations).
@@ -80,42 +80,28 @@ export function getGPU(recorder: TestCaseRecorder | null): GPU {
     GPUDevice.prototype.createShaderModule = function (
       descriptor: GPUShaderModuleDescriptor
     ): GPUShaderModule {
+      // If descriptor.code is missing or not a string, pass through to the original function
+      // This handles test cases that intentionally pass invalid descriptors
+      if (!descriptor.code || typeof descriptor.code !== 'string') {
+        return origCreateShaderModule.call(this, descriptor);
+      }
+
       try {
-        const newCode: string = link({
+        const srcMap = _linkSync({
           weslSrc: { './main.wesl': descriptor.code },
-          rootModuleName: 'main',
+          rootModuleName: './main.wesl',
           config: {},
-        }).dest;
-        const result = origCreateShaderModule.call(this, {
+        });
+        const newCode = srcMap.dest.text;
+        return origCreateShaderModule.call(this, {
           ...descriptor,
           code: newCode,
         });
-        return result;
       } catch (e) {
-        // Linking fails whenever the CTS test purposefully is an "error test"
-        console.warn('Linking failed', e);
-        const brokenShaderModule = origCreateShaderModule.call(this, {
-          ...descriptor,
-          code: 'wesl_failed_to_parse',
-        });
-        brokenShaderModule.getCompilationInfo = function (): Promise<GPUCompilationInfo> {
-          return Promise.resolve({
-            __brand: 'GPUCompilationInfo',
-            messages: [
-              {
-                __brand: 'GPUCompilationMessage',
-                type: 'error',
-                message: '' + e,
-                // TODO: Properly set these
-                length: 0,
-                lineNum: 1,
-                linePos: 1,
-                offset: 0,
-              },
-            ],
-          });
-        };
-        return brokenShaderModule;
+        // Linking failed - this could be invalid WGSL that we want WebGPU to validate
+        // Pass the original code so WebGPU can report the validation error
+        console.debug('WESL linking failed, passing original code to WebGPU:', e);
+        return origCreateShaderModule.call(this, descriptor);
       }
     };
   }

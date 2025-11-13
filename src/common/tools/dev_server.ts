@@ -188,6 +188,7 @@ app.get('/out/**/*.js', async (req, res, next) => {
 app.use('/out', serveIndex(path.resolve(srcDir, '../src')));
 app.use('/out', express.static(path.resolve(srcDir, '../src')));
 app.use('/wesl', express.static(path.resolve(srcDir, '../../tools/packages/wesl')));
+app.use('/mini-parse', express.static(path.resolve(srcDir, '../../tools/packages/mini-parse')));
 
 void (async () => {
   let host = '127.0.0.1';
