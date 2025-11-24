@@ -1,0 +1,7 @@
+{
+  "name": "cts-wesl-transpiler",
+  "private": true,
+  "dependencies": {
+    "wesl": "file:../../../tools/packages/wesl"
+  }
+}

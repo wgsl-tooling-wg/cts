@@ -2,6 +2,7 @@
 import { TestCaseRecorder } from '../framework/fixture.js';
 import { globalTestConfig } from '../framework/test_config.js';
 
+import { wrapDeviceWithTranspiler } from './shader_transpiler.js';
 import { ErrorWithExtra, assert, hasFeature, objectEquals } from './util.js';
 
 /**
@@ -71,36 +72,20 @@ export function getGPU(recorder: TestCaseRecorder | null): GPU {
 
   impl = gpuProvider();
 
-  const weslEnabled = true;
-  if (weslEnabled) {
+  // Wrap requestDevice to apply transpiler to each device
+  if (globalTestConfig.shaderTranspiler) {
     // eslint-disable-next-line @typescript-eslint/unbound-method
-    const origCreateShaderModule = GPUDevice.prototype.createShaderModule;
-    GPUDevice.prototype.createShaderModule = function (
-      descriptor: GPUShaderModuleDescriptor
-    ): GPUShaderModule {
-      // If descriptor.code is missing or not a string, pass through to the original function
-      // This handles test cases that intentionally pass invalid descriptors
-      if (!descriptor.code || typeof descriptor.code !== 'string') {
-        return origCreateShaderModule.call(this, descriptor);
-      }
+    const origRequestDeviceFn = GPUAdapter.prototype.requestDevice;
 
-      try {
-        const srcMap = _linkSync({
-          weslSrc: { './main.wesl': descriptor.code },
-          rootModuleName: './main.wesl',
-          config: {},
-        });
-        const newCode = srcMap.dest.text;
-        return origCreateShaderModule.call(this, {
-          ...descriptor,
-          code: newCode,
-        });
-      } catch (e) {
-        // Linking failed - this could be invalid WGSL that we want WebGPU to validate
-        // Pass the original code so WebGPU can report the validation error
-        console.debug('WESL linking failed, passing original code to WebGPU:', e);
-        return origCreateShaderModule.call(this, descriptor);
+    GPUAdapter.prototype.requestDevice = async function (
+      this: GPUAdapter,
+      desc?: GPUDeviceDescriptor | undefined
+    ) {
+      const device = await origRequestDeviceFn.call(this, desc);
+      if (device) {
+        wrapDeviceWithTranspiler(device);
       }
+      return device;
     };
   }
 

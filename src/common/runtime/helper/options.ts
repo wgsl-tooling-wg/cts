@@ -60,6 +60,7 @@ export interface CTSOptions {
   subcasesBetweenAttemptingGC: string;
   casesBetweenReplacingDevice: string;
   logToWebSocket: boolean;
+  shaderTranspiler: string | null;
 }
 
 export const kDefaultCTSOptions: Readonly<CTSOptions> = {
@@ -74,6 +75,7 @@ export const kDefaultCTSOptions: Readonly<CTSOptions> = {
   subcasesBetweenAttemptingGC: '5000',
   casesBetweenReplacingDevice: 'Infinity',
   logToWebSocket: false,
+  shaderTranspiler: null,
 };
 
 /**
@@ -152,6 +154,11 @@ Note: The spec requires bc or etc2+astc which means tests checking that one or o
     ],
   },
   logToWebSocket: { description: 'send some logs to ws://localhost:59497/' },
+  shaderTranspiler: {
+    description: 'URL to shader transpiler module',
+    parser: optionString,
+    selectValueDescriptions: [],
+  },
 };
 
 /**

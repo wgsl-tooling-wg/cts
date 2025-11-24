@@ -593,6 +593,23 @@ function showInfo(msg: string) {
 }
 
 void (async () => {
+  // Load shader transpiler if specified
+  if (options.shaderTranspiler) {
+    try {
+      const transpilerModule = await import(options.shaderTranspiler);
+
+      // Call init() if present (e.g., for WASM initialization)
+      if (typeof transpilerModule.init === 'function') {
+        await transpilerModule.init();
+      }
+
+      globalTestConfig.shaderTranspiler = transpilerModule.transpile;
+      console.log('Loaded shader transpiler from:', options.shaderTranspiler);
+    } catch (e) {
+      console.error('Failed to load shader transpiler:', e);
+    }
+  }
+
   const loader = new DefaultTestFileLoader();
 
   // MAINTENANCE_TODO: start populating page before waiting for everything to load?

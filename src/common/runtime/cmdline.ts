@@ -36,6 +36,7 @@ Options:
   --force-fallback-adapter  Force a fallback adapter
   --log-to-websocket        Log to a websocket
   --quiet                   Suppress summary information in output
+  --shader-transpiler       Path to module that exports a shader transpiler function
 `);
   return sys.exit(rc);
 }
@@ -73,6 +74,7 @@ let printJSON = false;
 let quiet = false;
 let loadWebGPUExpectations: Promise<unknown> | undefined = undefined;
 let gpuProviderModule: GPUProviderModule | undefined = undefined;
+let loadShaderTranspiler: Promise<void> | undefined = undefined;
 
 const queries: string[] = [];
 const gpuProviderFlags: string[] = [];
@@ -119,6 +121,21 @@ for (let i = 0; i < sys.args.length; ++i) {
       globalTestConfig.casesBetweenReplacingDevice = Number(sys.args[++i]);
     } else if (a === '--log-to-websocket') {
       globalTestConfig.logToWebSocket = true;
+    } else if (a === '--shader-transpiler') {
+      const modulePath = sys.args[++i];
+      const transpilerModule = require(modulePath);
+      if (typeof transpilerModule.transpile !== 'function') {
+        console.error(`Transpiler module must export a 'transpile' function`);
+        usage(1);
+      }
+      // If the module has an init function, await it before tests run
+      if (typeof transpilerModule.init === 'function') {
+        loadShaderTranspiler = transpilerModule.init().then(() => {
+          globalTestConfig.shaderTranspiler = transpilerModule.transpile;
+        });
+      } else {
+        globalTestConfig.shaderTranspiler = transpilerModule.transpile;
+      }
     } else {
       console.log('unrecognized flag: ', a);
       usage(1);
@@ -178,6 +195,11 @@ if (queries.length === 0) {
 }
 
 (async () => {
+  // Wait for shader transpiler to initialize if configured
+  if (loadShaderTranspiler) {
+    await loadShaderTranspiler;
+  }
+
   const loader = new DefaultTestFileLoader();
   assert(queries.length === 1, 'currently, there must be exactly one query on the cmd line');
   const filterQuery = parseQuery(queries[0]);

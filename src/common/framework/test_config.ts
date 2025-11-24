@@ -66,11 +66,19 @@ export type TestConfig = {
    * Whether to enable the `logToWebSocket` function used for out-of-band test logging.
    */
   logToWebSocket: boolean;
+
+  /**
+   * Optional shader transpiler to run before compiling shaders.
+   * When set, shader validation tests will run twice: once without the transpiler,
+   * and once with it. Both runs must produce the same result for the test to pass.
+   */
+  shaderTranspiler?: ShaderTranspiler;
 };
 
 /** Test configuration options. Globally modifiable global state. */
 export const globalTestConfig: TestConfig = {
   enableDebugLogs: false,
+  shaderTranspiler: undefined,
   maxSubcasesInFlight: 100,
   subcasesBetweenAttemptingGC: 5000,
   casesBetweenReplacingDevice: Infinity,
@@ -94,3 +102,9 @@ export function isCompatibilityDevice(device: GPUDevice) {
   }
   return globalTestConfig.compatibility;
 }
+
+/**
+ * A shader transpiler function that transforms WGSL code.
+ * Returns the transpiled code, or throws an error if transpilation fails.
+ */
+export type ShaderTranspiler = (code: string) => string;

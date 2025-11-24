@@ -62,6 +62,7 @@ export class ShaderValidationTest extends AllFeaturesMaxLimitsGPUTest {
     if (options?.autoSkipIfFeatureNotAvailable !== false) {
       skipIfCodeNeedsFeatureAndDeviceDoesNotHaveFeature(this, code);
     }
+
     let shaderModule: GPUShaderModule;
     this.expectGPUError(
       'validation',
