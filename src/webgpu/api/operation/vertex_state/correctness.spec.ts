@@ -12,7 +12,7 @@ import {
   unreachable,
 } from '../../../../common/util/util.js';
 import { kVertexFormatInfo, kVertexFormats } from '../../../capability_info.js';
-import { GPUTest, MaxLimitsTestMixin } from '../../../gpu_test.js';
+import { AllFeaturesMaxLimitsGPUTest } from '../../../gpu_test.js';
 import { float32ToFloat16Bits, normalizedIntegerAsFloat } from '../../../util/conversion.js';
 import { align, clamp } from '../../../util/math.js';
 
@@ -83,7 +83,7 @@ type TestData = {
   vertexData: ArrayBuffer;
 };
 
-class VertexStateTest extends GPUTest {
+class VertexStateTest extends AllFeaturesMaxLimitsGPUTest {
   // Generate for VS + FS (entrypoints vsMain / fsMain) that for each attribute will check that its
   // value corresponds to what's expected (as provided by a uniform buffer per attribute) and then
   // renders each vertex at position (vertexIndex, instanceindex) with either 1 (success) or
@@ -639,7 +639,7 @@ struct VSOutputs {
   }
 }
 
-export const g = makeTestGroup(MaxLimitsTestMixin(VertexStateTest));
+export const g = makeTestGroup(VertexStateTest);
 
 g.test('vertex_format_to_shader_format_conversion')
   .desc(
@@ -774,10 +774,14 @@ g.test('non_zero_array_stride_and_attribute_offset')
     const arrayStride = t.makeLimitVariant('maxVertexBufferArrayStride', arrayStrideVariant);
     const formatInfo = kVertexFormatInfo[format];
     const formatSize = formatInfo.byteSize;
-    const offset = clamp(makeValueTestVariant(arrayStride, offsetVariant), {
-      min: 0,
-      max: arrayStride - formatSize,
-    });
+    const makeMultipleOf = Math.min(formatSize, 4);
+    const offset =
+      Math.floor(
+        clamp(makeValueTestVariant(arrayStride, offsetVariant), {
+          min: 0,
+          max: arrayStride - formatSize,
+        }) / makeMultipleOf
+      ) * makeMultipleOf;
 
     t.runTest([
       {
@@ -1073,7 +1077,12 @@ g.test('array_stride_zero')
   )
   .fn(t => {
     const { format, stepMode, offsetVariant } = t.params;
-    const offset = t.makeLimitVariant('maxVertexBufferArrayStride', offsetVariant);
+    const formatInfo = kVertexFormatInfo[format];
+    const formatSize = formatInfo.byteSize;
+    const makeMultipleOf = Math.min(formatSize, 4);
+    const offset =
+      Math.floor(t.makeLimitVariant('maxVertexBufferArrayStride', offsetVariant) / makeMultipleOf) *
+      makeMultipleOf;
     const kCount = 10;
 
     // Create the stride 0 part of the test, first by faking a single vertex being drawn and

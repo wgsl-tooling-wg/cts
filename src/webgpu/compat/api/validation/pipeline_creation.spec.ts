@@ -3,6 +3,7 @@ Tests that createComputePipeline(async), and createRenderPipeline(async)
 reject pipelines that are invalid in compat mode
 
 - test that depth textures can not be used with non-comparison samplers
+- test that dpdxFine, dpdyFine, fwidthFine are disallowed
 
 TODO:
 - test that a shader that has more than min(maxSamplersPerShaderStage, maxSampledTexturesPerShaderStage)
@@ -10,6 +11,8 @@ TODO:
 `;
 
 import { makeTestGroup } from '../../../../common/framework/test_group.js';
+import { keysOf } from '../../../../common/util/data_tables.js';
+import * as vtu from '../../../api/validation/validation_test_utils.js';
 import {
   kShortShaderStages,
   kShortShaderStageToShaderStage,
@@ -18,82 +21,103 @@ import { CompatibilityTest } from '../../compatibility_test.js';
 
 export const g = makeTestGroup(CompatibilityTest);
 
+const kDepthCases = {
+  textureSampleWith2DF32: {
+    sampleWGSL: 'textureSample(t, s, vec2f(0))', // should pass
+    textureType: 'texture_2d<f32>',
+    viewDimension: '2d',
+  },
+  textureSampleWithDepth2D: {
+    sampleWGSL: 'textureSample(t, s, vec2f(0))',
+    textureType: 'texture_depth_2d',
+    viewDimension: '2d',
+  },
+  textureSampleWithDepthCube: {
+    sampleWGSL: 'textureSample(t, s, vec3f(0))',
+    textureType: 'texture_depth_cube',
+    viewDimension: 'cube',
+  },
+  textureSampleWithDepth2DArray: {
+    sampleWGSL: 'textureSample(t, s, vec2f(0), 0)',
+    textureType: 'texture_depth_2d_array',
+    viewDimension: '2d-array',
+  },
+  textureSampleWithOffsetWithDepth2D: {
+    sampleWGSL: 'textureSample(t, s, vec2f(0), vec2i(0, 0))',
+    textureType: 'texture_depth_2d',
+    viewDimension: '2d',
+  },
+  textureSampleWithOffsetWithDepth2DArray: {
+    sampleWGSL: 'textureSample(t, s, vec2f(0), 0, vec2i(0, 0))',
+    textureType: 'texture_depth_2d_array',
+    viewDimension: '2d-array',
+  },
+  textureSampleLevelWithDepth2D: {
+    sampleWGSL: 'textureSampleLevel(t, s, vec2f(0), 0)',
+    textureType: 'texture_depth_2d',
+    viewDimension: '2d',
+  },
+  textureSampleLevelWithDepthCube: {
+    sampleWGSL: 'textureSampleLevel(t, s, vec3f(0), 0)',
+    textureType: 'texture_depth_cube',
+    viewDimension: 'cube',
+  },
+  textureSampleLevelWithDepth2DArray: {
+    sampleWGSL: 'textureSampleLevel(t, s, vec2f(0), 0, 0)',
+    textureType: 'texture_depth_2d_array',
+    viewDimension: '2d-array',
+  },
+  textureSampleLevelWithOffsetWithDepth2D: {
+    sampleWGSL: 'textureSampleLevel(t, s, vec2f(0), 0, vec2i(0, 0))',
+    textureType: 'texture_depth_2d',
+    viewDimension: '2d',
+  },
+  textureSampleLevelWithOffsetWithDepth2DArray: {
+    sampleWGSL: 'textureSampleLevel(t, s, vec2f(0), 0, 0, vec2i(0, 0))',
+    textureType: 'texture_depth_2d_array',
+    viewDimension: '2d-array',
+  },
+  textureGatherWithDepth2D: {
+    sampleWGSL: 'textureGather(t, s, vec2f(0))',
+    textureType: 'texture_depth_2d',
+    viewDimension: '2d',
+  },
+  textureGatherWithDepthCube: {
+    sampleWGSL: 'textureGather(t, s, vec3f(0))',
+    textureType: 'texture_depth_cube',
+    viewDimension: 'cube',
+  },
+  textureGatherWithDepth2DArray: {
+    sampleWGSL: 'textureGather(t, s, vec2f(0), 0)',
+    textureType: 'texture_depth_2d_array',
+    viewDimension: '2d-array',
+  },
+  textureGatherWithOffsetWithDepth2D: {
+    sampleWGSL: 'textureGather(t, s, vec2f(0), vec2i(0, 0))',
+    textureType: 'texture_depth_2d',
+    viewDimension: '2d',
+  },
+  textureGatherWithOffsetDepth2DArray: {
+    sampleWGSL: 'textureGather(t, s, vec2f(0), 0, vec2i(0, 0))',
+    textureType: 'texture_depth_2d_array',
+    viewDimension: '2d-array',
+  },
+} as const;
+
 g.test('depth_textures')
   .desc('Tests that depth textures can not be used with non-comparison samplers in compat mode.')
   .params(u =>
     u //
-      .combineWithParams([
-        {
-          sampleWGSL: 'textureSample(t, s, vec2f(0))', // should pass
-          textureType: 'texture_2d<f32>',
-        },
-        {
-          sampleWGSL: 'textureSample(t, s, vec2f(0))',
-          textureType: 'texture_depth_2d',
-        },
-        {
-          sampleWGSL: 'textureSample(t, s, vec3f(0))',
-          textureType: 'texture_depth_cube',
-        },
-        {
-          sampleWGSL: 'textureSample(t, s, vec2f(0), 0)',
-          textureType: 'texture_depth_2d_array',
-        },
-        {
-          sampleWGSL: 'textureSample(t, s, vec2f(0), vec2i(0, 0))',
-          textureType: 'texture_depth_2d',
-        },
-        {
-          sampleWGSL: 'textureSample(t, s, vec2f(0), 0, vec2i(0, 0))',
-          textureType: 'texture_depth_2d_array',
-        },
-        {
-          sampleWGSL: 'textureSampleLevel(t, s, vec2f(0), 0)',
-          textureType: 'texture_depth_2d',
-        },
-        {
-          sampleWGSL: 'textureSampleLevel(t, s, vec3f(0), 0)',
-          textureType: 'texture_depth_cube',
-        },
-        {
-          sampleWGSL: 'textureSampleLevel(t, s, vec2f(0), 0, 0)',
-          textureType: 'texture_depth_2d_array',
-        },
-        {
-          sampleWGSL: 'textureSampleLevel(t, s, vec2f(0), 0, vec2i(0, 0))',
-          textureType: 'texture_depth_2d',
-        },
-        {
-          sampleWGSL: 'textureSampleLevel(t, s, vec2f(0), 0, 0, vec2i(0, 0))',
-          textureType: 'texture_depth_2d_array',
-        },
-        {
-          sampleWGSL: 'textureGather(t, s, vec2f(0))',
-          textureType: 'texture_depth_2d',
-        },
-        {
-          sampleWGSL: 'textureGather(t, s, vec3f(0))',
-          textureType: 'texture_depth_cube',
-        },
-        {
-          sampleWGSL: 'textureGather(t, s, vec2f(0), 0)',
-          textureType: 'texture_depth_2d_array',
-        },
-        {
-          sampleWGSL: 'textureGather(t, s, vec2f(0), vec2i(0, 0))',
-          textureType: 'texture_depth_2d',
-        },
-        {
-          sampleWGSL: 'textureGather(t, s, vec2f(0), 0, vec2i(0, 0))',
-          textureType: 'texture_depth_2d_array',
-        },
-      ])
+      .combine('depthCase', keysOf(kDepthCases))
       .combine('stage', kShortShaderStages)
-      .filter(t => t.sampleWGSL.startsWith('textureGather') || t.stage === 'f')
+      .filter(
+        t => kDepthCases[t.depthCase].sampleWGSL.startsWith('textureGather') || t.stage === 'f'
+      )
       .combine('async', [false, true] as const)
   )
   .fn(t => {
-    const { sampleWGSL, textureType, stage: shortStage, async } = t.params;
+    const { depthCase, stage: shortStage, async } = t.params;
+    const { sampleWGSL, textureType, viewDimension } = kDepthCases[depthCase];
     const stage = kShortShaderStageToShaderStage[shortStage];
 
     const usageWGSL = `_ = ${sampleWGSL};`;
@@ -123,11 +147,41 @@ g.test('depth_textures')
       `,
     });
 
+    const bindGroupLayout0 = t.device.createBindGroupLayout({
+      entries: [
+        {
+          binding: 0,
+          visibility: GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT | GPUShaderStage.COMPUTE,
+          texture: {
+            sampleType: textureType.includes('depth') ? 'depth' : 'float',
+            viewDimension,
+            multisampled: false,
+          },
+        },
+      ],
+    });
+
+    const bindGroupLayout1 = t.device.createBindGroupLayout({
+      entries: [
+        {
+          binding: 0,
+          visibility: GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT | GPUShaderStage.COMPUTE,
+          sampler: {
+            type: 'non-filtering',
+          },
+        },
+      ],
+    });
+
+    const layout = t.device.createPipelineLayout({
+      bindGroupLayouts: [bindGroupLayout0, bindGroupLayout1],
+    });
+
     const success = !t.isCompatibility || textureType === 'texture_2d<f32>';
     switch (stage) {
       case 'compute':
-        t.doCreateComputePipelineTest(async, success, {
-          layout: 'auto',
+        vtu.doCreateComputePipelineTest(t, async, success, {
+          layout,
           compute: {
             module,
           },
@@ -135,8 +189,8 @@ g.test('depth_textures')
         break;
       case 'fragment':
       case 'vertex':
-        t.doCreateRenderPipelineTest(async, success, {
-          layout: 'auto',
+        vtu.doCreateRenderPipelineTest(t, async, success, {
+          layout,
           vertex: {
             module,
           },
@@ -351,15 +405,63 @@ fn usage1() -> vec4f {
 
     const module = device.createShaderModule({ code });
     if (stages === 'compute') {
-      t.doCreateComputePipelineTest(async, pass || !t.isCompatibility, {
+      vtu.doCreateComputePipelineTest(t, async, pass || !t.isCompatibility, {
         layout,
         compute: { module },
       });
     } else {
-      t.doCreateRenderPipelineTest(async, pass || !t.isCompatibility, {
+      vtu.doCreateRenderPipelineTest(t, async, pass || !t.isCompatibility, {
         layout,
         vertex: { module },
         fragment: { module, targets: [{ format: 'rgba8unorm' }] },
       });
     }
+  });
+
+g.test('fine_derivatives')
+  .desc(
+    `
+Test that dpdxFine, dpdyFine, fwidthFine are disallowed in compatibility mode.
+`
+  )
+  .params(u =>
+    u
+      .combine('builtin', [
+        'dpdxCoarse', // to check the test itself, should pass always
+        'dpdxFine',
+        'dpdyFine',
+        'fwidthFine',
+      ] as const)
+      .combine('async', [false, true] as const)
+      .beginSubcases()
+      .combine('type', ['f32', 'vec2f', 'vec3f', 'vec4f'])
+  )
+  .fn(t => {
+    const { builtin, async, type } = t.params;
+
+    const code = `
+    struct VOut {
+      @builtin(position) pos: vec4f,
+      @location(0) v: ${type},
+    };
+
+    @vertex fn vs(@builtin(vertex_index) vNdx: u32) -> VOut {
+      let pos = array(vec2f(-1, 3), vec2f(3, -1), vec2f(-1, -1));
+      return VOut(vec4f(pos[vNdx], 0, 1), ${type}(pos[vNdx].x));
+    }
+
+    @fragment fn fs(v: VOut) -> @location(0) vec4f {
+      _ = ${builtin}(v.v);
+      return vec4f(0);
+    }
+    `;
+
+    const module = t.device.createShaderModule({ code });
+
+    const success = !t.isCompatibility || builtin === 'dpdxCoarse';
+    vtu.doCreateRenderPipelineTest(t, async, success, {
+      layout: 'auto',
+      vertex: { module },
+      fragment: { module, targets: [{ format: 'rgba8unorm' }] },
+    });
   });

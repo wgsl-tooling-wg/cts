@@ -8,6 +8,8 @@ import { ShaderValidationTest } from '../shader_validation_test.js';
 export const g = makeTestGroup(ShaderValidationTest);
 
 const kCollectiveOps = [
+  { op: 'control_case_compute', stage: 'compute' },
+  { op: 'control_case_fragment', stage: 'fragment' },
   { op: 'textureSample', stage: 'fragment' },
   { op: 'textureSampleBias', stage: 'fragment' },
   { op: 'textureSampleCompare', stage: 'fragment' },
@@ -115,6 +117,11 @@ function generateCondition(condition: string): string {
 
 function generateOp(op: string): string {
   switch (op) {
+    case 'control_case':
+    case 'control_case_compute':
+    case 'control_case_fragment': {
+      return ``;
+    }
     case 'textureSample': {
       return `let x = ${op}(tex, s, vec2(0,0));\n`;
     }
@@ -178,7 +185,14 @@ function generateOp(op: string): string {
   }
 }
 
-function generateConditionalStatement(statement: string, condition: string, op: string): string {
+const kStatementKinds = ['if', 'for', 'while', 'switch', 'break-if'] as const;
+type kStatementType = (typeof kStatementKinds)[number];
+
+function generateConditionalStatement(
+  statement: kStatementType,
+  condition: string,
+  op: string
+): string {
   const code = ``;
   switch (statement) {
     case 'if': {
@@ -208,8 +222,19 @@ function generateConditionalStatement(statement: string, condition: string, op: 
       }
       `;
     }
-    default: {
-      unreachable(`Unhandled statement`);
+    case 'break-if': {
+      // The initial 'if' prevents the loop from being infinite.  Its condition
+      // is uniform, to ensure the first iteration of the the body executes
+      // uniformly. The uniformity of the second iteration depends entirely on
+      // the uniformity of the break-if condition.
+      return `loop {
+        if ${generateCondition('uniform_storage_ro')} { break; }
+        ${generateOp(op)}
+        continuing {
+          break if ${generateCondition(condition)};
+        }
+      }
+      `;
     }
   }
 
@@ -220,7 +245,7 @@ g.test('basics')
   .desc(`Test collective operations in simple uniform or non-uniform control flow.`)
   .params(u =>
     u
-      .combine('statement', ['if', 'for', 'while', 'switch'] as const)
+      .combine('statement', kStatementKinds)
       .beginSubcases()
       .combineWithParams(kConditions)
       .combineWithParams(kCollectiveOps)
@@ -243,7 +268,7 @@ g.test('basics')
  @group(2) @binding(0) var ro_storage_texture : texture_storage_2d<rgba8unorm, read>;
  @group(2) @binding(1) var rw_storage_texture : texture_storage_2d<rgba8unorm, read_write>;
 
- var<private> priv_var : array<f32, 4> = array(0,0,0,0);
+ var<private> priv_var : array<u32, 4> = array(0,0,0,0);
 
  const c = false;
  override o : f32;
@@ -272,10 +297,11 @@ g.test('basics')
 
     code += `\n}\n`;
 
-    t.expectCompileResult(t.params.expectation, code);
+    t.expectCompileResult(t.params.expectation || t.params.op.startsWith('control_case'), code);
   });
 
 const kSubgroupOps = [
+  'control_case',
   'subgroupAdd',
   'subgroupInclusiveAdd',
   'subgroupExclusiveAdd',
@@ -307,15 +333,12 @@ g.test('basics,subgroups')
   .desc(`Test subgroup operations in simple uniform or non-uniform control flow.`)
   .params(u =>
     u
-      .combine('statement', ['if', 'for', 'while', 'switch'] as const)
+      .combine('statement', kStatementKinds)
       .beginSubcases()
       .combineWithParams(kConditions)
       .combine('op', kSubgroupOps)
       .combine('stage', ['compute', 'fragment'] as const)
   )
-  .beforeAllSubcases(t => {
-    t.selectDeviceOrSkipTestCase('subgroups' as GPUFeatureName);
-  })
   .fn(t => {
     let code = `
  enable subgroups;
@@ -332,7 +355,7 @@ g.test('basics,subgroups')
  @group(2) @binding(0) var ro_storage_texture : texture_storage_2d<rgba8unorm, read>;
  @group(2) @binding(1) var rw_storage_texture : texture_storage_2d<rgba8unorm, read_write>;
 
- var<private> priv_var : array<f32, 4> = array(0,0,0,0);
+ var<private> priv_var : array<u32, 4> = array(0,0,0,0);
 
  const c = false;
  override o : f32;
@@ -361,7 +384,7 @@ g.test('basics,subgroups')
 
     code += `\n}\n`;
 
-    t.expectCompileResult(t.params.expectation, code);
+    t.expectCompileResult(t.params.expectation || t.params.op.startsWith('control_case'), code);
   });
 
 const kFragmentBuiltinValues = [
@@ -389,6 +412,10 @@ const kFragmentBuiltinValues = [
     builtin: `subgroup_size`,
     type: `u32`,
   },
+  {
+    builtin: `primitive_id`,
+    type: `u32`,
+  },
 ];
 
 g.test('fragment_builtin_values')
@@ -399,10 +426,6 @@ g.test('fragment_builtin_values')
       t.isCompatibility && ['sample_index', 'sample_mask'].includes(t.params.builtin),
       'compatibility mode does not support sample_index or sample_mask'
     );
-    const builtin = t.params.builtin;
-    if (builtin.includes('subgroup')) {
-      t.selectDeviceOrSkipTestCase('subgroups' as GPUFeatureName);
-    }
   })
   .fn(t => {
     let cond = ``;
@@ -427,7 +450,13 @@ g.test('fragment_builtin_values')
         unreachable(`Unhandled type`);
       }
     }
-    const enable = t.params.builtin.includes('subgroup') ? 'enable subgroups;' : '';
+    let enable = '';
+    if (t.params.builtin.includes('subgroup')) {
+      enable = 'enable subgroups;\n';
+    } else if (t.params.builtin === 'primitive_id') {
+      enable = 'enable chromium_experimental_primitive_id;\n';
+    }
+
     const code = `
 ${enable}
 @group(0) @binding(0) var s : sampler;
@@ -481,14 +510,24 @@ const kComputeBuiltinValues = [
     type: `u32`,
     uniform: true,
   },
+  {
+    builtin: `subgroup_id`,
+    type: `u32`,
+    uniform: false,
+  },
+  {
+    builtin: `num_subgroups`,
+    type: `u32`,
+    uniform: true,
+  },
 ];
 
 g.test('compute_builtin_values')
   .desc(`Test uniformity of compute built-in values`)
   .params(u => u.combineWithParams(kComputeBuiltinValues).beginSubcases())
   .beforeAllSubcases(t => {
-    if (t.params.builtin.includes('subgroup')) {
-      t.selectDeviceOrSkipTestCase('subgroups' as GPUFeatureName);
+    if (t.params.builtin === `subgroup_id` || t.params.builtin === `num_subgroups`) {
+      t.skipIfLanguageFeatureNotSupported('subgroup_id');
     }
   })
   .fn(t => {
@@ -589,6 +628,11 @@ const kPointerCases: Record<string, PointerCase> = {
   wg_uniform_load_is_uniform: {
     code: `let test_val = workgroupUniformLoad(&wg_scalar);`,
     check: `contents`,
+    uniform: true,
+  },
+  wg_uniform_load_atomic_is_uniform: {
+    code: `let ptr = &wg_atomic;`,
+    check: `address`,
     uniform: true,
   },
   contents_scalar_uniform1: {
@@ -950,6 +994,7 @@ g.test('pointers')
     const code = `
 var<workgroup> wg_scalar : u32;
 var<workgroup> wg_array : array<u32, 16>;
+var<workgroup> wg_atomic : atomic<u32>;
 
 struct Inner {
   x : array<u32, 4>
@@ -2819,9 +2864,6 @@ g.test('subgroups,parameters')
       .combine('op', ['subgroupShuffleUp', 'subgroupShuffleDown', 'subgroupShuffleXor'] as const)
       .combine('uniform', [false, true] as const)
   )
-  .beforeAllSubcases(t => {
-    t.selectDeviceOrSkipTestCase('subgroups' as GPUFeatureName);
-  })
   .fn(t => {
     const wgsl = `
 enable subgroups;
