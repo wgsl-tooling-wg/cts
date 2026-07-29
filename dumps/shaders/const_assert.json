@@ -1,0 +1,36 @@
+{
+ "group": "const_assert",
+ "specs": {
+  "const_assert/const_assert": {
+   "total": 1334,
+   "unique": 1334,
+   "shaders": [
+    {"params":{"scope":"function","case":"variable_not_false"},"code":"\nconst one = 1;\nconst two = 2;\nconst three = 3;\nconst is_true = true;\nconst is_false = false;\nfn f() { const_assert (!is_false); }"},
+    {"params":{"scope":"module","lhs":"binary_op_eq_const_false","rhs":"variable_not_true"},"code":"\nconst one = 1;\nconst two = 2;\nconst three = 3;\nconst is_true = true;\nconst is_false = false;\nconst_assert (!((one + 5 == two) || (!is_true)));"},
+    {"params":{"scope":"module","lhs":"const_eq_literal_float_false","rhs":"variable_false"},"code":"\nconst one = 1;\nconst two = 2;\nconst three = 3;\nconst is_true = true;\nconst is_false = false;\nconst_assert (!((one == 0.0) || (is_false)));"},
+    {"params":{"scope":"module","lhs":"const_eq_literal_int_true","rhs":"variable_not_false"},"code":"\nconst one = 1;\nconst two = 2;\nconst three = 3;\nconst is_true = true;\nconst is_false = false;\nconst_assert ((one == 1) || (!is_false));"},
+    {"params":{"scope":"module","lhs":"literal_not_true","rhs":"variable_not_true"},"code":"\nconst one = 1;\nconst two = 2;\nconst three = 3;\nconst is_true = true;\nconst is_false = false;\nconst_assert (!((!true) || (!is_true)));"},
+    {"params":{"scope":"module","lhs":"min_max_false","rhs":"variable_false"},"code":"\nconst one = 1;\nconst two = 2;\nconst three = 3;\nconst is_true = true;\nconst is_false = false;\nconst_assert (!((min(three, max(two, one)) == 3) || (is_false)));"},
+    {"params":{"scope":"module","lhs":"variable_not_false","rhs":"variable_not_false"},"code":"\nconst one = 1;\nconst two = 2;\nconst three = 3;\nconst is_true = true;\nconst is_false = false;\nconst_assert ((!is_false) || (!is_false));"},
+    {"params":{"scope":"function","lhs":"binary_op_eq_const_false","rhs":"variable_false"},"code":"\nconst one = 1;\nconst two = 2;\nconst three = 3;\nconst is_true = true;\nconst is_false = false;\nfn f() { const_assert (!((one + 5 == two) || (is_false))); }"},
+    {"params":{"scope":"function","lhs":"const_eq_literal_float_true","rhs":"variable_not_false"},"code":"\nconst one = 1;\nconst two = 2;\nconst three = 3;\nconst is_true = true;\nconst is_false = false;\nfn f() { const_assert ((one == 1.0) || (!is_false)); }"},
+    {"params":{"scope":"function","lhs":"const_eq_literal_int_true","rhs":"min_max_true"},"code":"\nconst one = 1;\nconst two = 2;\nconst three = 3;\nconst is_true = true;\nconst is_false = false;\nfn f() { const_assert ((one == 1) || (min(three, max(two, one)) == 2)); }"},
+    {"params":{"scope":"function","lhs":"literal_not_true","rhs":"variable_false"},"code":"\nconst one = 1;\nconst two = 2;\nconst three = 3;\nconst is_true = true;\nconst is_false = false;\nfn f() { const_assert (!((!true) || (is_false))); }"},
+    {"params":{"scope":"function","lhs":"min_max_true","rhs":"variable_not_false"},"code":"\nconst one = 1;\nconst two = 2;\nconst three = 3;\nconst is_true = true;\nconst is_false = false;\nfn f() { const_assert ((min(three, max(two, one)) == 2) || (!is_false)); }"},
+    {"params":{"scope":"function","lhs":"variable_not_false","rhs":"min_max_true"},"code":"\nconst one = 1;\nconst two = 2;\nconst three = 3;\nconst is_true = true;\nconst is_false = false;\nfn f() { const_assert ((!is_false) || (min(three, max(two, one)) == 2)); }"},
+    {"params":{"scope":"module","lhs":"any_false","rhs":"variable_false"},"code":"\nconst one = 1;\nconst two = 2;\nconst three = 3;\nconst is_true = true;\nconst is_false = false;\nconst_assert (!((any(vec3(false, false, false))) && (is_false)));"},
+    {"params":{"scope":"module","lhs":"const_eq_literal_float_true","rhs":"min_max_true"},"code":"\nconst one = 1;\nconst two = 2;\nconst three = 3;\nconst is_true = true;\nconst is_false = false;\nconst_assert ((one == 1.0) && (min(three, max(two, one)) == 2));"},
+    {"params":{"scope":"module","lhs":"literal_false","rhs":"variable_false"},"code":"\nconst one = 1;\nconst two = 2;\nconst three = 3;\nconst is_true = true;\nconst is_false = false;\nconst_assert (!((false) && (is_false)));"},
+    {"params":{"scope":"module","lhs":"literal_not_true","rhs":"min_max_false"},"code":"\nconst one = 1;\nconst two = 2;\nconst three = 3;\nconst is_true = true;\nconst is_false = false;\nconst_assert (!((!true) && (min(three, max(two, one)) == 3)));"},
+    {"params":{"scope":"module","lhs":"min_max_true","rhs":"min_max_true"},"code":"\nconst one = 1;\nconst two = 2;\nconst three = 3;\nconst is_true = true;\nconst is_false = false;\nconst_assert ((min(three, max(two, one)) == 2) && (min(three, max(two, one)) == 2));"},
+    {"params":{"scope":"function","lhs":"any_false","rhs":"min_max_false"},"code":"\nconst one = 1;\nconst two = 2;\nconst three = 3;\nconst is_true = true;\nconst is_false = false;\nfn f() { const_assert (!((any(vec3(false, false, false))) && (min(three, max(two, one)) == 3))); }"},
+    {"params":{"scope":"function","lhs":"binary_op_eq_const_true","rhs":"min_max_true"},"code":"\nconst one = 1;\nconst two = 2;\nconst three = 3;\nconst is_true = true;\nconst is_false = false;\nfn f() { const_assert ((one + 1 == two) && (min(three, max(two, one)) == 2)); }"},
+    {"params":{"scope":"function","lhs":"const_eq_literal_float_true","rhs":"literal_true"},"code":"\nconst one = 1;\nconst two = 2;\nconst three = 3;\nconst is_true = true;\nconst is_false = false;\nfn f() { const_assert ((one == 1.0) && (true)); }"},
+    {"params":{"scope":"function","lhs":"literal_false","rhs":"min_max_false"},"code":"\nconst one = 1;\nconst two = 2;\nconst three = 3;\nconst is_true = true;\nconst is_false = false;\nfn f() { const_assert (!((false) && (min(three, max(two, one)) == 3))); }"},
+    {"params":{"scope":"function","lhs":"literal_true","rhs":"min_max_true"},"code":"\nconst one = 1;\nconst two = 2;\nconst three = 3;\nconst is_true = true;\nconst is_false = false;\nfn f() { const_assert ((true) && (min(three, max(two, one)) == 2)); }"},
+    {"params":{"scope":"function","lhs":"min_max_true","rhs":"literal_true"},"code":"\nconst one = 1;\nconst two = 2;\nconst three = 3;\nconst is_true = true;\nconst is_false = false;\nfn f() { const_assert ((min(three, max(two, one)) == 2) && (true)); }"},
+    {"params":{"scope":"function","lhs":"variable_not_true","rhs":"min_max_false"},"code":"\nconst one = 1;\nconst two = 2;\nconst three = 3;\nconst is_true = true;\nconst is_false = false;\nfn f() { const_assert (!((!is_true) && (min(three, max(two, one)) == 3))); }"}
+   ]
+  }
+ }
+}

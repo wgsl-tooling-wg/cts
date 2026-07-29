@@ -1,0 +1,7 @@
+{
+  "sourceTree": "691789f2a6f87d270fdccfa558aee97d1efc7975",
+  "operatorFilter": "^(binary|unary)/a[fi]_(?!matrix)",
+  "builtinFilter": "^(?!bitcast$|derivatives$|fwidth$|pack|unpack)[a-z][a-zA-Z0-9]*$",
+  "operatorMax": 100,
+  "builtinMax": 40
+}

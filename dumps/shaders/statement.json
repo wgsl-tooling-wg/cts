@@ -1,0 +1,337 @@
+{
+ "group": "statement",
+ "specs": {
+  "statement/break": {
+   "total": 8,
+   "unique": 8,
+   "shaders": [
+    {"params":{"stmt":"loop_break"},"code":"\n@vertex\nfn vtx() -> @builtin(position) vec4f {\n  loop { break; }\n  return vec4f(1);\n}\n    "},
+    {"params":{"stmt":"loop_if_break"},"code":"\n@vertex\nfn vtx() -> @builtin(position) vec4f {\n  loop { if true { break; } }\n  return vec4f(1);\n}\n    "},
+    {"params":{"stmt":"while_break"},"code":"\n@vertex\nfn vtx() -> @builtin(position) vec4f {\n  while true { break; }\n  return vec4f(1);\n}\n    "},
+    {"params":{"stmt":"while_if_break"},"code":"\n@vertex\nfn vtx() -> @builtin(position) vec4f {\n  while true { if true { break; } }\n  return vec4f(1);\n}\n    "},
+    {"params":{"stmt":"for_break"},"code":"\n@vertex\nfn vtx() -> @builtin(position) vec4f {\n  for (;;) { break; }\n  return vec4f(1);\n}\n    "},
+    {"params":{"stmt":"for_if_break"},"code":"\n@vertex\nfn vtx() -> @builtin(position) vec4f {\n  for (;;) { if true { break; } }\n  return vec4f(1);\n}\n    "},
+    {"params":{"stmt":"switch_case_break"},"code":"\n@vertex\nfn vtx() -> @builtin(position) vec4f {\n  switch(1) { default: { break; } }\n  return vec4f(1);\n}\n    "},
+    {"params":{"stmt":"switch_case_if_break"},"code":"\n@vertex\nfn vtx() -> @builtin(position) vec4f {\n  switch(1) { default: { if true { break; } } }\n  return vec4f(1);\n}\n    "}
+   ]
+  },
+  "statement/break_if": {
+   "total": 3,
+   "unique": 3,
+   "shaders": [
+    {"params":{"type":"bool"},"code":"\n\n\n\n\nfn f() {\n  loop {\n    continuing {\n      break if true;\n    }\n  }\n}\n"},
+    {"params":{"stmt":"continuing_break_if"},"code":"\n@vertex\nfn vtx() -> @builtin(position) vec4f {\n  loop { continuing { break if true; } }\n  return vec4f(1);\n}\n    "},
+    {"params":{"stmt":"continuing_break_if_parens"},"code":"\n@vertex\nfn vtx() -> @builtin(position) vec4f {\n  loop { continuing { break if (true); } }\n  return vec4f(1);\n}\n    "}
+   ]
+  },
+  "statement/compound": {
+   "total": 5,
+   "unique": 5,
+   "shaders": [
+    {"params":{"stmt":"empty"},"code":"\n@vertex\nfn vtx() -> @builtin(position) vec4f {\n  {}\n  return vec4f(1);\n}\n    "},
+    {"params":{"stmt":"semicolon"},"code":"\n@vertex\nfn vtx() -> @builtin(position) vec4f {\n  {;}\n  return vec4f(1);\n}\n    "},
+    {"params":{"stmt":"semicolons"},"code":"\n@vertex\nfn vtx() -> @builtin(position) vec4f {\n  {;;}\n  return vec4f(1);\n}\n    "},
+    {"params":{"stmt":"decl"},"code":"\n@vertex\nfn vtx() -> @builtin(position) vec4f {\n  {const c = 1;}\n  return vec4f(1);\n}\n    "},
+    {"params":{"stmt":"nested"},"code":"\n@vertex\nfn vtx() -> @builtin(position) vec4f {\n  { {} }\n  return vec4f(1);\n}\n    "}
+   ]
+  },
+  "statement/const_assert": {
+   "total": 4,
+   "unique": 4,
+   "shaders": [
+    {"params":{"case":"no_parentheses"},"code":"const_assert true;"},
+    {"params":{"case":"both_parentheses"},"code":"const_assert(true);"},
+    {"params":{"case":"condition_on_newline"},"code":"const_assert\ntrue;"},
+    {"params":{"case":"multiline_with_parentheses"},"code":"const_assert\n(\n  true\n);"}
+   ]
+  },
+  "statement/continue": {
+   "total": 8,
+   "unique": 8,
+   "shaders": [
+    {"params":{"stmt":"loop_continue"},"code":"\n@vertex\nfn vtx() -> @builtin(position) vec4f {\n  loop { if false { break; } continue; }\n  return vec4f(1);\n}\n    "},
+    {"params":{"stmt":"while_continue"},"code":"\n@vertex\nfn vtx() -> @builtin(position) vec4f {\n  while true { continue; }\n  return vec4f(1);\n}\n    "},
+    {"params":{"stmt":"for_continue"},"code":"\n@vertex\nfn vtx() -> @builtin(position) vec4f {\n  for (;true;) { continue; }\n  return vec4f(1);\n}\n    "},
+    {"params":{"stmt":"continuing_nested_loop_continue"},"code":"\n@vertex\nfn vtx() -> @builtin(position) vec4f {\n  loop { if false { break; } continuing { loop { if false { break; } continue; } } }\n  return vec4f(1);\n}\n    "},
+    {"params":{"stmt":"nested_if_continue"},"code":"\n@vertex\nfn vtx() -> @builtin(position) vec4f {\n  while true { if true { continue; } }\n  return vec4f(1);\n}\n    "},
+    {"params":{"stmt":"nested_switch_case_continue"},"code":"\n@vertex\nfn vtx() -> @builtin(position) vec4f {\n  while true { switch(1) { default: { continue; } } }\n  return vec4f(1);\n}\n    "},
+    {"params":{"stmt":"loop_continue_after_decl_used_in_continuing"},"code":"\n@vertex\nfn vtx() -> @builtin(position) vec4f {\n  loop { let cond = false; continue; continuing { break if cond; } }\n  return vec4f(1);\n}\n    "},
+    {"params":{"stmt":"loop_continue_before_decl_not_used_in_continuing"},"code":"\n@vertex\nfn vtx() -> @builtin(position) vec4f {\n  loop { continue; let cond = false; continuing { break if false; } }\n  return vec4f(1);\n}\n    "}
+   ]
+  },
+  "statement/continuing": {
+   "total": 24,
+   "unique": 24,
+   "shaders": [
+    {"params":{"stmt":"continuing_break_if"},"code":"\nfn b() -> i32 {\n  return 1;\n}\n\n@fragment\nfn frag() -> @location(0) vec4f {\n  var a = 0;\n  loop { continuing { break if true; } }\n  return vec4f(1);\n}\n    "},
+    {"params":{"stmt":"continuing_empty"},"code":"\nfn b() -> i32 {\n  return 1;\n}\n\n@fragment\nfn frag() -> @location(0) vec4f {\n  var a = 0;\n  loop { if a == 4 { break; } continuing { } }\n  return vec4f(1);\n}\n    "},
+    {"params":{"stmt":"continuing_break_if_parens"},"code":"\nfn b() -> i32 {\n  return 1;\n}\n\n@fragment\nfn frag() -> @location(0) vec4f {\n  var a = 0;\n  loop { continuing { break if (true); } }\n  return vec4f(1);\n}\n    "},
+    {"params":{"stmt":"continuing_discard"},"code":"\nfn b() -> i32 {\n  return 1;\n}\n\n@fragment\nfn frag() -> @location(0) vec4f {\n  var a = 0;\n  loop { if a == 4 { break; } continuing { discard; } }\n  return vec4f(1);\n}\n    "},
+    {"params":{"stmt":"continuing_continue_nested"},"code":"\nfn b() -> i32 {\n  return 1;\n}\n\n@fragment\nfn frag() -> @location(0) vec4f {\n  var a = 0;\n  loop { if a == 4 { break; } continuing { loop { if a == 4 { break; } continue; } } }\n  return vec4f(1);\n}\n    "},
+    {"params":{"stmt":"continuing_for"},"code":"\nfn b() -> i32 {\n  return 1;\n}\n\n@fragment\nfn frag() -> @location(0) vec4f {\n  var a = 0;\n  loop { if a == 4 { break; } continuing { for(;a < 4;) { } } }\n  return vec4f(1);\n}\n    "},
+    {"params":{"stmt":"continuing_for_break"},"code":"\nfn b() -> i32 {\n  return 1;\n}\n\n@fragment\nfn frag() -> @location(0) vec4f {\n  var a = 0;\n  loop { if a == 4 { break; } continuing { for(;;) { break; } } }\n  return vec4f(1);\n}\n    "},
+    {"params":{"stmt":"continuing_while"},"code":"\nfn b() -> i32 {\n  return 1;\n}\n\n@fragment\nfn frag() -> @location(0) vec4f {\n  var a = 0;\n  loop { if a == 4 { break; } continuing { while a < 4 { } } }\n  return vec4f(1);\n}\n    "},
+    {"params":{"stmt":"continuing_while_break"},"code":"\nfn b() -> i32 {\n  return 1;\n}\n\n@fragment\nfn frag() -> @location(0) vec4f {\n  var a = 0;\n  loop { if a == 4 { break; } continuing { while true { break; } } }\n  return vec4f(1);\n}\n    "},
+    {"params":{"stmt":"continuing_semicolon"},"code":"\nfn b() -> i32 {\n  return 1;\n}\n\n@fragment\nfn frag() -> @location(0) vec4f {\n  var a = 0;\n  loop { if a == 4 { break; } continuing { ; } }\n  return vec4f(1);\n}\n    "},
+    {"params":{"stmt":"continuing_functionn_call"},"code":"\nfn b() -> i32 {\n  return 1;\n}\n\n@fragment\nfn frag() -> @location(0) vec4f {\n  var a = 0;\n  loop { if a == 4 { break; } continuing { _ = b(); } }\n  return vec4f(1);\n}\n    "},
+    {"params":{"stmt":"continuing_let"},"code":"\nfn b() -> i32 {\n  return 1;\n}\n\n@fragment\nfn frag() -> @location(0) vec4f {\n  var a = 0;\n  loop { if a == 4 { break; } continuing { let c = b(); } }\n  return vec4f(1);\n}\n    "},
+    {"params":{"stmt":"continuing_var"},"code":"\nfn b() -> i32 {\n  return 1;\n}\n\n@fragment\nfn frag() -> @location(0) vec4f {\n  var a = 0;\n  loop { if a == 4 { break; } continuing { var a = b(); } }\n  return vec4f(1);\n}\n    "},
+    {"params":{"stmt":"continuing_const"},"code":"\nfn b() -> i32 {\n  return 1;\n}\n\n@fragment\nfn frag() -> @location(0) vec4f {\n  var a = 0;\n  loop { if a == 4 { break; } continuing { const a = 1; } }\n  return vec4f(1);\n}\n    "},
+    {"params":{"stmt":"continuing_block"},"code":"\nfn b() -> i32 {\n  return 1;\n}\n\n@fragment\nfn frag() -> @location(0) vec4f {\n  var a = 0;\n  loop { if a == 4 { break; } continuing { { } } }\n  return vec4f(1);\n}\n    "},
+    {"params":{"stmt":"continuing_const_assert"},"code":"\nfn b() -> i32 {\n  return 1;\n}\n\n@fragment\nfn frag() -> @location(0) vec4f {\n  var a = 0;\n  loop { if a == 4 { break; } continuing { const_assert(1 != 2); } }\n  return vec4f(1);\n}\n    "},
+    {"params":{"stmt":"continuing_loop"},"code":"\nfn b() -> i32 {\n  return 1;\n}\n\n@fragment\nfn frag() -> @location(0) vec4f {\n  var a = 0;\n  loop { if a == 4 { break; } continuing { loop { break; } } }\n  return vec4f(1);\n}\n    "},
+    {"params":{"stmt":"continuing_if"},"code":"\nfn b() -> i32 {\n  return 1;\n}\n\n@fragment\nfn frag() -> @location(0) vec4f {\n  var a = 0;\n  loop { if a == 4 { break; } continuing { if true { } else if false { } else { } } }\n  return vec4f(1);\n}\n    "},
+    {"params":{"stmt":"continuing_switch"},"code":"\nfn b() -> i32 {\n  return 1;\n}\n\n@fragment\nfn frag() -> @location(0) vec4f {\n  var a = 0;\n  loop { if a == 4 { break; } continuing { switch 2 { default: { } } } }\n  return vec4f(1);\n}\n    "},
+    {"params":{"stmt":"continuing_switch_break"},"code":"\nfn b() -> i32 {\n  return 1;\n}\n\n@fragment\nfn frag() -> @location(0) vec4f {\n  var a = 0;\n  loop { if a == 4 { break; } continuing { switch 2 { default: { break; } } } }\n  return vec4f(1);\n}\n    "},
+    {"params":{"stmt":"continuing_loop_nested_continuing"},"code":"\nfn b() -> i32 {\n  return 1;\n}\n\n@fragment\nfn frag() -> @location(0) vec4f {\n  var a = 0;\n  loop { if a == 4 { break; } continuing { loop { if a == 4 { break; } continuing { } } } }\n  return vec4f(1);\n}\n    "},
+    {"params":{"stmt":"continuing_inc"},"code":"\nfn b() -> i32 {\n  return 1;\n}\n\n@fragment\nfn frag() -> @location(0) vec4f {\n  var a = 0;\n  loop { if a == 4 { break; } continuing { a += 1; } }\n  return vec4f(1);\n}\n    "},
+    {"params":{"stmt":"continuing_dec"},"code":"\nfn b() -> i32 {\n  return 1;\n}\n\n@fragment\nfn frag() -> @location(0) vec4f {\n  var a = 0;\n  loop { if a == 4 { break; } continuing { a -= 1; } }\n  return vec4f(1);\n}\n    "},
+    {"params":{"stmt":"continuing_semicolon_break_if"},"code":"\nfn b() -> i32 {\n  return 1;\n}\n\n@fragment\nfn frag() -> @location(0) vec4f {\n  var a = 0;\n  loop { continuing { ; break if (true); } }\n  return vec4f(1);\n}\n    "}
+   ]
+  },
+  "statement/discard": {
+   "total": 2,
+   "unique": 2,
+   "shaders": [
+    {"params":{"place":"fragment"},"code":"\n\n\nfn subvert() {\n  \n}\n\n@vertex\nfn vtx() -> @builtin(position) vec4f {\n  \n  subvert();\n  return vec4f(1);\n}\n\nfn subfrag() {\n  \n}\n\n@fragment\nfn frag() -> @location(0) vec4f {\n  discard;\n  subfrag();\n  return vec4f(1);\n}\n\nfn subcomp() {\n  \n}\n\n@compute\n@workgroup_size(1)\nfn comp() {\n  \n  subcomp();\n}\n"},
+    {"params":{"place":"subfrag"},"code":"\n\n\nfn subvert() {\n  \n}\n\n@vertex\nfn vtx() -> @builtin(position) vec4f {\n  \n  subvert();\n  return vec4f(1);\n}\n\nfn subfrag() {\n  discard;\n}\n\n@fragment\nfn frag() -> @location(0) vec4f {\n  \n  subfrag();\n  return vec4f(1);\n}\n\nfn subcomp() {\n  \n}\n\n@compute\n@workgroup_size(1)\nfn comp() {\n  \n  subcomp();\n}\n"}
+   ]
+  },
+  "statement/for": {
+   "total": 23,
+   "unique": 23,
+   "shaders": [
+    {"params":{"type":"bool"},"code":"\n\n\n\n\nfn f() -> bool {\n  for (; true;) {\n    return true;\n  }\n  return false;\n}\n"},
+    {"params":{"test":"break"},"code":"\nfn f() {\n  var v = 1;\n  for (;;) { break; }\n}\n\nfn x() {}\n"},
+    {"params":{"test":"init_var"},"code":"\nfn f() {\n  var v = 1;\n  for (var i = 1;;) { break; }\n}\n\nfn x() {}\n"},
+    {"params":{"test":"init_var_type"},"code":"\nfn f() {\n  var v = 1;\n  for (var i : i32 = 1;;) { break; }\n}\n\nfn x() {}\n"},
+    {"params":{"test":"init_var_function"},"code":"\nfn f() {\n  var v = 1;\n  for (var<function> i = 1;;) { break; }\n}\n\nfn x() {}\n"},
+    {"params":{"test":"init_var_function_type"},"code":"\nfn f() {\n  var v = 1;\n  for (var<function> i : i32 = 1;;) { break; }\n}\n\nfn x() {}\n"},
+    {"params":{"test":"init_let"},"code":"\nfn f() {\n  var v = 1;\n  for (let i = 1;;) { break; }\n}\n\nfn x() {}\n"},
+    {"params":{"test":"init_let_type"},"code":"\nfn f() {\n  var v = 1;\n  for (let i : u32 = 1;;) { break; }\n}\n\nfn x() {}\n"},
+    {"params":{"test":"init_const"},"code":"\nfn f() {\n  var v = 1;\n  for (const i = 1;;) { break; }\n}\n\nfn x() {}\n"},
+    {"params":{"test":"init_const_type"},"code":"\nfn f() {\n  var v = 1;\n  for (const i : f32 = 1;;) { break; }\n}\n\nfn x() {}\n"},
+    {"params":{"test":"init_call"},"code":"\nfn f() {\n  var v = 1;\n  for (x();;) { break; }\n}\n\nfn x() {}\n"},
+    {"params":{"test":"init_phony"},"code":"\nfn f() {\n  var v = 1;\n  for (_ = v;;) { break; }\n}\n\nfn x() {}\n"},
+    {"params":{"test":"init_increment"},"code":"\nfn f() {\n  var v = 1;\n  for (v++;;) { break; }\n}\n\nfn x() {}\n"},
+    {"params":{"test":"init_compound_assign"},"code":"\nfn f() {\n  var v = 1;\n  for (v += 3;;) { break; }\n}\n\nfn x() {}\n"},
+    {"params":{"test":"cond_true"},"code":"\nfn f() {\n  var v = 1;\n  for (;true;) { break; }\n}\n\nfn x() {}\n"},
+    {"params":{"test":"cont_call"},"code":"\nfn f() {\n  var v = 1;\n  for (;;x()) { break; }\n}\n\nfn x() {}\n"},
+    {"params":{"test":"cont_phony"},"code":"\nfn f() {\n  var v = 1;\n  for (;;_ = v) { break; }\n}\n\nfn x() {}\n"},
+    {"params":{"test":"cont_increment"},"code":"\nfn f() {\n  var v = 1;\n  for (;;v++) { break; }\n}\n\nfn x() {}\n"},
+    {"params":{"test":"cont_compound_assign"},"code":"\nfn f() {\n  var v = 1;\n  for (;;v += 3) { break; }\n}\n\nfn x() {}\n"},
+    {"params":{"test":"init_cond"},"code":"\nfn f() {\n  var v = 1;\n  for (var i = 1; i < 5;) {}\n}\n\nfn x() {}\n"},
+    {"params":{"test":"cond_cont"},"code":"\nfn f() {\n  var v = 1;\n  for (;v < 5; v++) {}\n}\n\nfn x() {}\n"},
+    {"params":{"test":"init_cond_cont"},"code":"\nfn f() {\n  var v = 1;\n  for (var i = 0; i < 5; i++) {}\n}\n\nfn x() {}\n"},
+    {"params":{"test":"init_shadow"},"code":"\nfn f() {\n  var v = 1;\n  for (var f = 0; f < 5; f++) {}\n}\n\nfn x() {}\n"}
+   ]
+  },
+  "statement/if": {
+   "total": 18,
+   "unique": 18,
+   "shaders": [
+    {"params":{"type":"bool"},"code":"\n\n\n\n\nfn f() -> bool {\n  if true {\n    return true;\n  }\n  return false;\n}\n"},
+    {"params":{"type":"bool"},"code":"\n\n\n\n\nfn f(c : bool) -> bool {\n  if (c) {\n    return true;\n  } else if (true) {\n    return true;\n  }\n  return false;\n}\n"},
+    {"params":{"test":"true"},"code":"\nfn f() {\n  let expr = true;\n  if true {}\n}"},
+    {"params":{"test":"paren_true"},"code":"\nfn f() {\n  let expr = true;\n  if (true) {}\n}"},
+    {"params":{"test":"expr"},"code":"\nfn f() {\n  let expr = true;\n  if expr {}\n}"},
+    {"params":{"test":"paren_expr"},"code":"\nfn f() {\n  let expr = true;\n  if (expr) {}\n}"},
+    {"params":{"test":"true_else"},"code":"\nfn f() {\n  let expr = true;\n  if true {} else {}\n}"},
+    {"params":{"test":"paren_true_else"},"code":"\nfn f() {\n  let expr = true;\n  if (true) {} else {}\n}"},
+    {"params":{"test":"expr_else"},"code":"\nfn f() {\n  let expr = true;\n  if expr {} else {}\n}"},
+    {"params":{"test":"paren_expr_else"},"code":"\nfn f() {\n  let expr = true;\n  if (expr) {} else {}\n}"},
+    {"params":{"test":"true_else_if_true"},"code":"\nfn f() {\n  let expr = true;\n  if true {} else if true {}\n}"},
+    {"params":{"test":"paren_true_else_if_paren_true"},"code":"\nfn f() {\n  let expr = true;\n  if (true) {} else if (true) {}\n}"},
+    {"params":{"test":"true_else_if_paren_true"},"code":"\nfn f() {\n  let expr = true;\n  if true {} else if (true) {}\n}"},
+    {"params":{"test":"paren_true_else_if_true"},"code":"\nfn f() {\n  let expr = true;\n  if (true) {} else if true {}\n}"},
+    {"params":{"test":"expr_else_if_expr"},"code":"\nfn f() {\n  let expr = true;\n  if expr {} else if expr {}\n}"},
+    {"params":{"test":"paren_expr_else_if_paren_expr"},"code":"\nfn f() {\n  let expr = true;\n  if (expr) {} else if (expr) {}\n}"},
+    {"params":{"test":"expr_else_if_paren_expr"},"code":"\nfn f() {\n  let expr = true;\n  if expr {} else if (expr) {}\n}"},
+    {"params":{"test":"paren_expr_else_if_expr"},"code":"\nfn f() {\n  let expr = true;\n  if (expr) {} else if expr {}\n}"}
+   ]
+  },
+  "statement/increment_decrement": {
+   "total": 82,
+   "unique": 82,
+   "shaders": [
+    {"params":{"type":"i32","direction":"down"},"code":"\n\n\nfn f() {\n  var a = i32(1);\n  a--;\n}"},
+    {"params":{"type":"abstractInt","direction":"up"},"code":"\n\n\nfn f() {\n  var a = 1;\n  a++;\n}"},
+    {"params":{"type":"v2u_y","direction":"down"},"code":"\n\n\nfn f() {\n  var a: vec2u;\n  a.y--;\n}"},
+    {"params":{"type":"v3u_y","direction":"up"},"code":"\n\n\nfn f() {\n  var a: vec3u;\n  a.y++;\n}"},
+    {"params":{"type":"v3u_z","direction":"up"},"code":"\n\n\nfn f() {\n  var a: vec3u;\n  a.z++;\n}"},
+    {"params":{"type":"v4u_x","direction":"down"},"code":"\n\n\nfn f() {\n  var a: vec4u;\n  a.x--;\n}"},
+    {"params":{"type":"v4u_w","direction":"up"},"code":"\n\n\nfn f() {\n  var a: vec4u;\n  a.w++;\n}"},
+    {"params":{"type":"v2i_x","direction":"down"},"code":"\n\n\nfn f() {\n  var a: vec2i;\n  a.x--;\n}"},
+    {"params":{"type":"v2i_y","direction":"down"},"code":"\n\n\nfn f() {\n  var a: vec2i;\n  a.y--;\n}"},
+    {"params":{"type":"v3i_y","direction":"up"},"code":"\n\n\nfn f() {\n  var a: vec3i;\n  a.y++;\n}"},
+    {"params":{"type":"v3i_z","direction":"down"},"code":"\n\n\nfn f() {\n  var a: vec3i;\n  a.z--;\n}"},
+    {"params":{"type":"v4i_x","direction":"down"},"code":"\n\n\nfn f() {\n  var a: vec4i;\n  a.x--;\n}"},
+    {"params":{"type":"v4i_z","direction":"up"},"code":"\n\n\nfn f() {\n  var a: vec4i;\n  a.z++;\n}"},
+    {"params":{"type":"v2u_indexed","direction":"down"},"code":"\n\n\nfn f() {\n  var a: vec2u;\n  a[0]--;\n}"},
+    {"params":{"type":"struct_field","direction":"up"},"code":"\n\nstruct S{field:i32}\nfn f() {\n  var a: S;\n  a.field++;\n}"},
+    {"params":{"test":"var","direction":"up"},"code":"\n\nfn f() {\n  var a: u32;\n  var b: u32;\n  var v: vec4u;\n  a++;\n}"},
+    {"params":{"test":"paren_var_paren","direction":"down"},"code":"\n\nfn f() {\n  var a: u32;\n  var b: u32;\n  var v: vec4u;\n  (a)--;\n}"},
+    {"params":{"test":"many_star_and_var","direction":"up"},"code":"\n\nfn f() {\n  var a: u32;\n  var b: u32;\n  var v: vec4u;\n  *&*&*&a++;\n}"},
+    {"params":{"test":"space","direction":"down"},"code":"\n\nfn f() {\n  var a: u32;\n  var b: u32;\n  var v: vec4u;\n  a --;\n}"},
+    {"params":{"test":"cr","direction":"up"},"code":"\n\nfn f() {\n  var a: u32;\n  var b: u32;\n  var v: vec4u;\n  a\r++;\n}"},
+    {"params":{"test":"space_space","direction":"down"},"code":"\n\nfn f() {\n  var a: u32;\n  var b: u32;\n  var v: vec4u;\n  a -- ;\n}"},
+    {"params":{"test":"private","direction":"down"},"code":"\nvar<private> g:i32;\nfn f() {\n  var a: u32;\n  var b: u32;\n  var v: vec4u;\n  g--;\n}"},
+    {"params":{"test":"storage_rw","direction":"up"},"code":"\n@group(0) @binding(0) var<storage,read_write> g: i32;\nfn f() {\n  var a: u32;\n  var b: u32;\n  var v: vec4u;\n  g++;\n}"},
+    {"params":{"test":"in_for_init","direction":"down"},"code":"\n\nfn f() {\n  var a: u32;\n  var b: u32;\n  var v: vec4u;\n  for (a--;false;) {}\n}"},
+    {"params":{"test":"in_continuing","direction":"up"},"code":"\n\nfn f() {\n  var a: u32;\n  var b: u32;\n  var v: vec4u;\n  loop { continuing { a++; break if true;}}\n}"}
+   ]
+  },
+  "statement/loop": {
+   "total": 8,
+   "unique": 8,
+   "shaders": [
+    {"params":{"type":"bool"},"code":"\n\n\n\n\nfn f() {\n  loop {\n    continuing {\n      break if true;\n    }\n  }\n}\n"},
+    {"params":{"test":"break"},"code":"\nfn f() {\n  let expr = true;\n  loop { break; }\n}"},
+    {"params":{"test":"return"},"code":"\nfn f() {\n  let expr = true;\n  loop { return; }\n}"},
+    {"params":{"test":"break_continuing"},"code":"\nfn f() {\n  let expr = true;\n  loop { break; continuing {} }\n}"},
+    {"params":{"test":"var_break"},"code":"\nfn f() {\n  let expr = true;\n  loop { var a = 1; break; }\n}"},
+    {"params":{"test":"var_break_continuing_inc"},"code":"\nfn f() {\n  let expr = true;\n  loop { var a = 1; break; continuing { a += 1; }}\n}"},
+    {"params":{"test":"var_break_continuing_discard"},"code":"\nfn f() {\n  let expr = true;\n  loop { var a = 1; break; continuing { discard; }}\n}"},
+    {"params":{"test":"continuing_break_if"},"code":"\nfn f() {\n  let expr = true;\n  loop { continuing { break if true; } }\n}"}
+   ]
+  },
+  "statement/phony": {
+   "total": 39,
+   "unique": 39,
+   "shaders": [
+    {"params":{"type":"bool"},"code":"\n\n\nfn f() {\n  _ = true;\n}"},
+    {"params":{"type":"i32"},"code":"\n\n\nfn f() {\n  _ = i32(1);\n}"},
+    {"params":{"type":"f32"},"code":"\n\n\nfn f() {\n  _ = 1.0f;\n}"},
+    {"params":{"type":"f16"},"code":"\nenable f16;\n\nfn f() {\n  _ = 1.0h;\n}"},
+    {"params":{"type":"vec3h"},"code":"\nenable f16;\n\nfn f() {\n  _ = vec3(1.0h, 1.0h, 1.0h);\n}"},
+    {"params":{"type":"vec3b"},"code":"\n\n\nfn f() {\n  _ = vec3(true, true, true);\n}"},
+    {"params":{"type":"mat2x3f"},"code":"\n\n\nfn f() {\n  _ = mat2x3(1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f);\n}"},
+    {"params":{"type":"abstractInt"},"code":"\n\n\nfn f() {\n  _ = 1;\n}"},
+    {"params":{"type":"abstractFloat"},"code":"\n\n\nfn f() {\n  _ = 1.0;\n}"},
+    {"params":{"type":"struct"},"code":"\n\nstruct S{ a:u32, b:u32}\nfn f() {\n  _ = S(1,2);\n}"},
+    {"params":{"test":"uniform"},"code":"\n@group(0) @binding(0) var<uniform> x: u32;\n@compute @workgroup_size(1)\nfn f() {\n  \n  _ = x;\n}"},
+    {"params":{"test":"texture"},"code":"\n@group(0) @binding(0) var x: texture_2d<f32>;\n@compute @workgroup_size(1)\nfn f() {\n  \n  _ = x;\n}"},
+    {"params":{"test":"sampler_comparison"},"code":"\n@group(0) @binding(0) var x: sampler_comparison;\n@compute @workgroup_size(1)\nfn f() {\n  \n  _ = x;\n}"},
+    {"params":{"test":"workgroup"},"code":"\nvar<workgroup> x: u32;\n@compute @workgroup_size(1)\nfn f() {\n  \n  _ = x;\n}"},
+    {"params":{"test":"override"},"code":"\noverride o: u32;\n@compute @workgroup_size(1)\nfn f() {\n  \n  _ = o;\n}"},
+    {"params":{"test":"let"},"code":"\n\n@compute @workgroup_size(1)\nfn f() {\n  let v = 1;\n  _ = v;\n}"},
+    {"params":{"test":"const"},"code":"\nconst c = 1;\n@compute @workgroup_size(1)\nfn f() {\n  \n  _ = c;\n}"},
+    {"params":{"test":"ptr"},"code":"\n\n@compute @workgroup_size(1)\nfn f() {\n  var x: u32;\n  _ = &x;\n}"},
+    {"params":{"test":"indexed"},"code":"\n@group(0) @binding(0) var<storage> x: array<u32>;\n@compute @workgroup_size(1)\nfn f() {\n  \n  _ = x[0];\n}"},
+    {"params":{"test":"builtin_call"},"code":"\n\n@compute @workgroup_size(1)\nfn f() {\n  \n  _ = max(1,1);\n}"},
+    {"params":{"test":"literal"},"code":"\nfn f() {\n  var v: u32;\n  _ = 1;\n}"},
+    {"params":{"test":"expr"},"code":"\nfn f() {\n  var v: u32;\n  _ = (1+v);\n}"},
+    {"params":{"test":"in_for_init"},"code":"\nfn f() {\n  var v: u32;\n  for (_ = v;false;) {}\n}"},
+    {"params":{"test":"in_block"},"code":"\nfn f() {\n  var v: u32;\n  {_ = v;}\n}"},
+    {"params":{"test":"in_continuing"},"code":"\nfn f() {\n  var v: u32;\n  loop { continuing { _ = v; break if true;}}\n}"}
+   ]
+  },
+  "statement/return": {
+   "total": 30,
+   "unique": 30,
+   "shaders": [
+    {"params":{},"code":"\n\n\nfn f() {\n  return;\n}\n"},
+    {"params":{},"code":"\n\n\nfn f() {\n  return ;\n}\n"},
+    {"params":{"return_value_type":"i32","fn_return_type":"i32"},"code":"\n\n\nfn f() -> i32 {\n  return i32(1);\n}\n"},
+    {"params":{"return_value_type":"u32","fn_return_type":"u32"},"code":"\n\n\nfn f() -> u32 {\n  return 1u;\n}\n"},
+    {"params":{"return_value_type":"f32","fn_return_type":"f32"},"code":"\n\n\nfn f() -> f32 {\n  return 1.0f;\n}\n"},
+    {"params":{"return_value_type":"f16","fn_return_type":"f16"},"code":"\nenable f16;\n\nfn f() -> f16 {\n  return 1.0h;\n}\n"},
+    {"params":{"return_value_type":"vec3h","fn_return_type":"vec3h"},"code":"\nenable f16;\n\nfn f() -> vec3<f16> {\n  return vec3(1.0h, 1.0h, 1.0h);\n}\n"},
+    {"params":{"return_value_type":"vec4u","fn_return_type":"vec4u"},"code":"\n\n\nfn f() -> vec4<u32> {\n  return vec4(1u, 1u, 1u, 1u);\n}\n"},
+    {"params":{"return_value_type":"vec3b","fn_return_type":"vec3b"},"code":"\n\n\nfn f() -> vec3<bool> {\n  return vec3(true, true, true);\n}\n"},
+    {"params":{"return_value_type":"mat2x3f","fn_return_type":"mat2x3f"},"code":"\n\n\nfn f() -> mat2x3<f32> {\n  return mat2x3(1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f);\n}\n"},
+    {"params":{"return_value_type":"mat4x2h","fn_return_type":"mat4x2h"},"code":"\nenable f16;\n\nfn f() -> mat4x2<f16> {\n  return mat4x2(1.0h, 1.0h, 1.0h, 1.0h, 1.0h, 1.0h, 1.0h, 1.0h);\n}\n"},
+    {"params":{"return_value_type":"abstract-int","fn_return_type":"i32"},"code":"\n\n\nfn f() -> i32 {\n  return 1;\n}\n"},
+    {"params":{"return_value_type":"abstract-int","fn_return_type":"u32"},"code":"\n\n\nfn f() -> u32 {\n  return 1;\n}\n"},
+    {"params":{"return_value_type":"abstract-int","fn_return_type":"f16"},"code":"\nenable f16;\n\nfn f() -> f16 {\n  return 1;\n}\n"},
+    {"params":{"return_value_type":"abstract-float","fn_return_type":"f32"},"code":"\n\n\nfn f() -> f32 {\n  return 1.0;\n}\n"},
+    {"params":{"return_value_type":"abstract-float","fn_return_type":"f16"},"code":"\nenable f16;\n\nfn f() -> f16 {\n  return 1.0;\n}\n"},
+    {"params":{"return_value_type":"vec2af","fn_return_type":"vec2f"},"code":"\n\n\nfn f() -> vec2<f32> {\n  return vec2(1.0, 1.0);\n}\n"},
+    {"params":{"return_value_type":"vec2ai","fn_return_type":"vec2f"},"code":"\n\n\nfn f() -> vec2<f32> {\n  return vec2(1, 1);\n}\n"},
+    {"params":{"return_value_type":"vec3ai","fn_return_type":"vec3h"},"code":"\nenable f16;\n\nfn f() -> vec3<f16> {\n  return vec3(1, 1, 1);\n}\n"},
+    {"params":{"return_value_type":"vec4ai","fn_return_type":"vec4u"},"code":"\n\n\nfn f() -> vec4<u32> {\n  return vec4(1, 1, 1, 1);\n}\n"},
+    {"params":{"test":"no_expr","fn_returns_value":false},"code":"\nfn f()  {\n  let v = 42;\n  return;\n}\nfn x() -> i32 {\n  return 1;\n}\n"},
+    {"params":{"test":"v","fn_returns_value":true},"code":"\nfn f() -> i32 {\n  let v = 42;\n  return v;\n}\nfn x() -> i32 {\n  return 1;\n}\n"},
+    {"params":{"test":"literal","fn_returns_value":true},"code":"\nfn f() -> i32 {\n  let v = 42;\n  return 10;\n}\nfn x() -> i32 {\n  return 1;\n}\n"},
+    {"params":{"test":"expr","fn_returns_value":true},"code":"\nfn f() -> i32 {\n  let v = 42;\n  return 1 + 2;\n}\nfn x() -> i32 {\n  return 1;\n}\n"},
+    {"params":{"test":"call","fn_returns_value":true},"code":"\nfn f() -> i32 {\n  let v = 42;\n  return x();\n}\nfn x() -> i32 {\n  return 1;\n}\n"}
+   ]
+  },
+  "statement/statement_behavior": {
+   "total": 42,
+   "unique": 40,
+   "shaders": [
+    {"params":{"body":"empty"},"code":"\n    var<private> v : i32;\n    fn bar() { }\n    fn foo() {\n      ;\n    }"},
+    {"params":{"body":"const_assert"},"code":"\n    var<private> v : i32;\n    fn bar() { }\n    fn foo() {\n      const_assert true;\n    }"},
+    {"params":{"body":"var1"},"code":"\n    var<private> v : i32;\n    fn bar() { }\n    fn foo() {\n      var x = 1;\n    }"},
+    {"params":{"body":"var2"},"code":"\n    var<private> v : i32;\n    fn bar() { }\n    fn foo() {\n      var x : i32;\n    }"},
+    {"params":{"body":"phony_assign"},"code":"\n    var<private> v : i32;\n    fn bar() { }\n    fn foo() {\n      _ = 1;\n    }"},
+    {"params":{"body":"return"},"code":"\n    var<private> v : i32;\n    fn bar() { }\n    fn foo() {\n      return;\n    }"},
+    {"params":{"body":"discard"},"code":"\n    var<private> v : i32;\n    fn bar() { }\n    fn foo() {\n      discard;\n    }"},
+    {"params":{"body":"function_call2"},"code":"\n    var<private> v : i32;\n    fn bar() { }\n    fn foo() {\n      workgroupBarrier();\n    }"},
+    {"params":{"body":"if1"},"code":"\n    var<private> v : i32;\n    fn bar() { }\n    fn foo() {\n      if true { } else { };\n    }"},
+    {"params":{"body":"break1"},"code":"\n    var<private> v : i32;\n    fn bar() { }\n    fn foo() {\n      loop { break; };\n    }"},
+    {"params":{"body":"break_if"},"code":"\n    var<private> v : i32;\n    fn bar() { }\n    fn foo() {\n      loop { continuing { break if false; } };\n    }"},
+    {"params":{"body":"continue1"},"code":"\n    var<private> v : i32;\n    fn bar() { }\n    fn foo() {\n      loop { continue; continuing { break if true; } };\n    }"},
+    {"params":{"body":"loop4"},"code":"\n    var<private> v : i32;\n    fn bar() { }\n    fn foo() {\n      loop { break; continue; };\n    }"},
+    {"params":{"body":"for2"},"code":"\n    var<private> v : i32;\n    fn bar() { }\n    fn foo() {\n      for (;;) { break; };\n    }"},
+    {"params":{"body":"for3"},"code":"\n    var<private> v : i32;\n    fn bar() { }\n    fn foo() {\n      for (;true;) { continue; };\n    }"},
+    {"params":{"body":"while2"},"code":"\n    var<private> v : i32;\n    fn bar() { }\n    fn foo() {\n      while true { continue; };\n    }"},
+    {"params":{"body":"while3"},"code":"\n    var<private> v : i32;\n    fn bar() { }\n    fn foo() {\n      while true { continue; break; };\n    }"},
+    {"params":{"body":"switch2"},"code":"\n    var<private> v : i32;\n    fn bar() { }\n    fn foo() {\n      switch 1 { case 1 { } default { } };\n    }"},
+    {"params":{"body":"switch4"},"code":"\n    var<private> v : i32;\n    fn bar() { }\n    fn foo() {\n      switch 1 { default { } case 1 { break; } };\n    }"},
+    {"params":{"body":"sequence1"},"code":"\n    var<private> v : i32;\n    fn bar() { }\n    fn foo() {\n      return; let x = 1;\n    }"},
+    {"params":{"body":"sequence3"},"code":"\n    var<private> v : i32;\n    fn bar() { }\n    fn foo() {\n      switch 1 { default { break; return; } };\n    }"},
+    {"params":{"body":"compound1"},"code":"\n    var<private> v : i32;\n    fn bar() { }\n    fn foo() {\n      { };\n    }"},
+    {"params":{"function":"empty"},"code":"fn foo() { }"},
+    {"params":{"function":"unreachable_code_after_return_with_value"},"code":"fn foo() -> bool { return false; _ = 0; }"},
+    {"params":{"function":"no_final_return"},"code":"fn foo() -> bool { if true { return true; } else { return false; } }"}
+   ]
+  },
+  "statement/switch": {
+   "total": 47,
+   "unique": 47,
+   "shaders": [
+    {"params":{"type":"u32"},"code":"\n\n\n\n\nfn f() -> bool {\n  switch 1u {\n    case 1: {\n      return true;\n    }\n    default: {\n      return false;\n    }\n  }\n}\n"},
+    {"params":{"cond_type":"i32","case_type":"i32"},"code":"\nfn f() -> bool {\nswitch i32(1) {\n  case i32(2): {\n    return true;\n  }\n  default: {\n    return false;\n  }\n}\n}\n"},
+    {"params":{"cond_type":"i32","case_type":"abstract-int"},"code":"\nfn f() -> bool {\nswitch i32(1) {\n  case 2: {\n    return true;\n  }\n  default: {\n    return false;\n  }\n}\n}\n"},
+    {"params":{"cond_type":"u32","case_type":"abstract-int"},"code":"\nfn f() -> bool {\nswitch 1u {\n  case 2: {\n    return true;\n  }\n  default: {\n    return false;\n  }\n}\n}\n"},
+    {"params":{"cond_type":"abstract-int","case_type":"abstract-int"},"code":"\nfn f() -> bool {\nswitch 1 {\n  case 2: {\n    return true;\n  }\n  default: {\n    return false;\n  }\n}\n}\n"},
+    {"params":{"case_a_type":"i32","case_b_type":"abstract-int"},"code":"\nfn f() -> bool {\nswitch 1 {\n  case i32(1): {\n    return true;\n  }\n  case 2: {\n    return true;\n  }\n  default: {\n    return false;\n  }\n}\n}\n"},
+    {"params":{"case_a_type":"u32","case_b_type":"u32"},"code":"\nfn f() -> bool {\nswitch 1 {\n  case 1u: {\n    return true;\n  }\n  case 2u: {\n    return true;\n  }\n  default: {\n    return false;\n  }\n}\n}\n"},
+    {"params":{"case_a_type":"abstract-int","case_b_type":"i32"},"code":"\nfn f() -> bool {\nswitch 1 {\n  case 1: {\n    return true;\n  }\n  case i32(2): {\n    return true;\n  }\n  default: {\n    return false;\n  }\n}\n}\n"},
+    {"params":{"case_a_type":"abstract-int","case_b_type":"abstract-int"},"code":"\nfn f() -> bool {\nswitch 1 {\n  case 1: {\n    return true;\n  }\n  case 2: {\n    return true;\n  }\n  default: {\n    return false;\n  }\n}\n}\n"},
+    {"params":{"test":"L_default"},"code":"\nfn f() {\n  let L = 1;\n  const C1 = 1;\n  const C2 = 2;\n  switch L { default {} }\n}"},
+    {"params":{"test":"L_case_1_2_default"},"code":"\nfn f() {\n  let L = 1;\n  const C1 = 1;\n  const C2 = 2;\n  switch L { case 1, 2 {} default {} }\n}"},
+    {"params":{"test":"L_case_1_colon_default_colon"},"code":"\nfn f() {\n  let L = 1;\n  const C1 = 1;\n  const C2 = 2;\n  switch L { case 1: {} default: {} }\n}"},
+    {"params":{"test":"L_case_1_default_2"},"code":"\nfn f() {\n  let L = 1;\n  const C1 = 1;\n  const C2 = 2;\n  switch L { case 1, default, 2 {} }\n}"},
+    {"params":{"test":"L_case_1_default_case_2"},"code":"\nfn f() {\n  let L = 1;\n  const C1 = 1;\n  const C2 = 2;\n  switch L { case 1 {} default {} case 2 {} }\n}"},
+    {"params":{"test":"L_case_1_default"},"code":"\nfn f() {\n  let L = 1;\n  const C1 = 1;\n  const C2 = 2;\n  switch L { case 1 {} default {} }\n}"},
+    {"params":{"test":"L_case_2_default_case_1"},"code":"\nfn f() {\n  let L = 1;\n  const C1 = 1;\n  const C2 = 2;\n  switch L { case 2 {} default {} case 1 {} }\n}"},
+    {"params":{"test":"L_case_C1_case_C2_default"},"code":"\nfn f() {\n  let L = 1;\n  const C1 = 1;\n  const C2 = 2;\n  switch L { case C1 {} case C2 {} default {} }\n}"},
+    {"params":{"test":"L_case_C1_default"},"code":"\nfn f() {\n  let L = 1;\n  const C1 = 1;\n  const C2 = 2;\n  switch L { case C1 {} default {} }\n}"},
+    {"params":{"test":"L_case_default_2_1"},"code":"\nfn f() {\n  let L = 1;\n  const C1 = 1;\n  const C2 = 2;\n  switch L { case default, 2, 1 {} }\n}"},
+    {"params":{"test":"L_case_default"},"code":"\nfn f() {\n  let L = 1;\n  const C1 = 1;\n  const C2 = 2;\n  switch L { case default {} }\n}"},
+    {"params":{"test":"L_case_expr_default"},"code":"\nfn f() {\n  let L = 1;\n  const C1 = 1;\n  const C2 = 2;\n  switch L { case 1+1 {} default {} }\n}"},
+    {"params":{"test":"L_default_case_1_2"},"code":"\nfn f() {\n  let L = 1;\n  const C1 = 1;\n  const C2 = 2;\n  switch L { default {} case 1, 2 {} }\n}"},
+    {"params":{"test":"L_default_case_1_colon_break"},"code":"\nfn f() {\n  let L = 1;\n  const C1 = 1;\n  const C2 = 2;\n  switch L { default {} case 1: { break; } }\n}"},
+    {"params":{"test":"L_default_colon_break"},"code":"\nfn f() {\n  let L = 1;\n  const C1 = 1;\n  const C2 = 2;\n  switch L { default: { break; } }\n}"},
+    {"params":{"test":"L_default_colon"},"code":"\nfn f() {\n  let L = 1;\n  const C1 = 1;\n  const C2 = 2;\n  switch L { default: {} }\n}"}
+   ]
+  },
+  "statement/while": {
+   "total": 8,
+   "unique": 8,
+   "shaders": [
+    {"params":{"type":"bool"},"code":"\n\n\n\n\nfn f() -> bool {\n  while (true) {\n    return true;\n  }\n  return false;\n}\n"},
+    {"params":{"test":"true"},"code":"\nfn f() {\n  let expr = true;\n  while true {}\n}"},
+    {"params":{"test":"paren_true"},"code":"\nfn f() {\n  let expr = true;\n  while (true) {}\n}"},
+    {"params":{"test":"true_break"},"code":"\nfn f() {\n  let expr = true;\n  while true { break; }\n}"},
+    {"params":{"test":"true_discard"},"code":"\nfn f() {\n  let expr = true;\n  while true { discard; }\n}"},
+    {"params":{"test":"true_return"},"code":"\nfn f() {\n  let expr = true;\n  while true { return; }\n}"},
+    {"params":{"test":"expr"},"code":"\nfn f() {\n  let expr = true;\n  while expr {}\n}"},
+    {"params":{"test":"paren_expr"},"code":"\nfn f() {\n  let expr = true;\n  while (expr) {}\n}"}
+   ]
+  }
+ }
+}

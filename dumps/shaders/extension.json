@@ -1,0 +1,105 @@
+{
+ "group": "extension",
+ "specs": {
+  "extension/clip_distances": {
+   "total": 1,
+   "unique": 1,
+   "shaders": [
+    {"params":{"requireExtension":true,"enableExtension":true},"code":"\n        enable clip_distances;\n        struct VertexOut {\n          @builtin(clip_distances) my_clip_distances : array<f32, 1>,\n          @builtin(position) my_position : vec4f,\n        }\n        @vertex fn main() -> VertexOut {\n          var output : VertexOut;\n          output.my_clip_distances[0] = 1.0;\n          output.my_position = vec4f(0.0, 0.0, 0.0, 1.0);\n          return output;\n        }\n    "}
+   ]
+  },
+  "extension/dual_source_blending": {
+   "total": 30,
+   "unique": 30,
+   "shaders": [
+    {"params":{"requireExtension":true,"enableExtension":true},"code":"\n        enable dual_source_blending;\n        struct FragOut {\n          @location(0) @blend_src(0) color : vec4f,\n          @location(0) @blend_src(1) blend : vec4f,\n        }\n        @fragment fn main() -> FragOut {\n          var output : FragOut;\n          output.color = vec4f(1.0, 0.0, 0.0, 1.0);\n          output.blend = vec4f(0.0, 1.0, 0.0, 1.0);\n          return output;\n        }\n    "},
+    {"params":{"attr":"zero"},"code":"\nenable dual_source_blending;\n\nconst a = 0;\nconst b = 1;\nconst c = 1;\noverride z = 0;\noverride y = 1;\n\nstruct FragOut {\n  @location(0) @blend_src(0) blend : vec4f,\n  \n  @location(0) @blend_src(1) color1 : vec4f,\n}\n\n@fragment fn main() -> FragOut {\n  var output : FragOut;\n  output.blend = vec4f(1.0, 0.0, 0.0, 1.0);\n  \n  output.color1 = output.blend;\n  return output;\n}"},
+    {"params":{"attr":"extra_comma"},"code":"\nenable dual_source_blending;\n\nconst a = 0;\nconst b = 1;\nconst c = 1;\noverride z = 0;\noverride y = 1;\n\nstruct FragOut {\n  @location(0) @blend_src(1,) blend : vec4f,\n  @location(0) @blend_src(0) color0 : vec4f,\n  \n}\n\n@fragment fn main() -> FragOut {\n  var output : FragOut;\n  output.blend = vec4f(1.0, 0.0, 0.0, 1.0);\n  output.color0 = output.blend;\n  \n  return output;\n}"},
+    {"params":{"attr":"i32"},"code":"\nenable dual_source_blending;\n\nconst a = 0;\nconst b = 1;\nconst c = 1;\noverride z = 0;\noverride y = 1;\n\nstruct FragOut {\n  @location(0) @blend_src(1i) blend : vec4f,\n  @location(0) @blend_src(0) color0 : vec4f,\n  \n}\n\n@fragment fn main() -> FragOut {\n  var output : FragOut;\n  output.blend = vec4f(1.0, 0.0, 0.0, 1.0);\n  output.color0 = output.blend;\n  \n  return output;\n}"},
+    {"params":{"attr":"u32"},"code":"\nenable dual_source_blending;\n\nconst a = 0;\nconst b = 1;\nconst c = 1;\noverride z = 0;\noverride y = 1;\n\nstruct FragOut {\n  @location(0) @blend_src(1u) blend : vec4f,\n  @location(0) @blend_src(0) color0 : vec4f,\n  \n}\n\n@fragment fn main() -> FragOut {\n  var output : FragOut;\n  output.blend = vec4f(1.0, 0.0, 0.0, 1.0);\n  output.color0 = output.blend;\n  \n  return output;\n}"},
+    {"params":{"attr":"hex"},"code":"\nenable dual_source_blending;\n\nconst a = 0;\nconst b = 1;\nconst c = 1;\noverride z = 0;\noverride y = 1;\n\nstruct FragOut {\n  @location(0) @blend_src(0x1) blend : vec4f,\n  @location(0) @blend_src(0) color0 : vec4f,\n  \n}\n\n@fragment fn main() -> FragOut {\n  var output : FragOut;\n  output.blend = vec4f(1.0, 0.0, 0.0, 1.0);\n  output.color0 = output.blend;\n  \n  return output;\n}"},
+    {"params":{"attr":"newline"},"code":"\nenable dual_source_blending;\n\nconst a = 0;\nconst b = 1;\nconst c = 1;\noverride z = 0;\noverride y = 1;\n\nstruct FragOut {\n  @location(0) @\nblend_src(1) blend : vec4f,\n  @location(0) @blend_src(0) color0 : vec4f,\n  \n}\n\n@fragment fn main() -> FragOut {\n  var output : FragOut;\n  output.blend = vec4f(1.0, 0.0, 0.0, 1.0);\n  output.color0 = output.blend;\n  \n  return output;\n}"},
+    {"params":{"attr":"comment"},"code":"\nenable dual_source_blending;\n\nconst a = 0;\nconst b = 1;\nconst c = 1;\noverride z = 0;\noverride y = 1;\n\nstruct FragOut {\n  @location(0) @/* comment */blend_src(1) blend : vec4f,\n  @location(0) @blend_src(0) color0 : vec4f,\n  \n}\n\n@fragment fn main() -> FragOut {\n  var output : FragOut;\n  output.blend = vec4f(1.0, 0.0, 0.0, 1.0);\n  output.color0 = output.blend;\n  \n  return output;\n}"},
+    {"params":{"attr":"fragment_output"},"code":"\nenable dual_source_blending;\n\n\n    struct BlendSrcStruct {\n      @location(0) @blend_src(0) color : vec4f,\n      @location(0) @blend_src(1) blend : vec4f,\n    }\n    @fragment fn main() -> BlendSrcStruct {\n      var fragmentOutput : BlendSrcStruct;\n      fragmentOutput.color = vec4f(0.0, 1.0, 0.0, 1.0);\n      fragmentOutput.blend = fragmentOutput.color;\n      return fragmentOutput;\n    }\n    \n"},
+    {"params":{"attr":"struct_member_no_location_no_blend_src"},"code":"\nenable dual_source_blending;\n\n\n    struct BlendSrcStruct {\n      @location(0) @blend_src(0) color : vec4f,\n      @location(0) @blend_src(1) blend : vec4f,\n      depth : f32,\n    }\n    \n\n@fragment fn main() -> @location(0) vec4f {\n  return vec4f();\n}\n"},
+    {"params":{"attr":"struct_member_blend_src_and_builtin"},"code":"\nenable dual_source_blending;\n\n\n    struct BlendSrcStruct {\n      @location(0) @blend_src(0) color : vec4f,\n      @location(0) @blend_src(1) blend : vec4f,\n      @builtin(frag_depth) depth : f32,\n    }\n    \n\n@fragment fn main() -> @location(0) vec4f {\n  return vec4f();\n}\n"},
+    {"params":{"attr":"struct_member_location_0_blend_src_0_blend_src_1"},"code":"\nenable dual_source_blending;\n\n\n    struct BlendSrcStruct {\n      @location(0) @blend_src(0) color : vec4f,\n      @location(0) @blend_src(1) blend : vec4f,\n    }\n    \n\n@fragment fn main() -> @location(0) vec4f {\n  return vec4f();\n}\n"},
+    {"params":{"blendSrc0Type":"f16","blendSrc1Type":"f16"},"code":"\nenable dual_source_blending;\n\nenable f16;\n\nstruct BlendSrcOutput {\n  @location(0) @blend_src(0) color : f16,\n  @location(0) @blend_src(1) blend : f16,\n}\n\n@fragment fn main() -> BlendSrcOutput {\n  var output : BlendSrcOutput;\n  output.color = f16();\n  output.blend = f16();\n  return output;\n}\n"},
+    {"params":{"blendSrc0Type":"i32","blendSrc1Type":"i32"},"code":"\nenable dual_source_blending;\n\n\n\nstruct BlendSrcOutput {\n  @location(0) @blend_src(0) color : i32,\n  @location(0) @blend_src(1) blend : i32,\n}\n\n@fragment fn main() -> BlendSrcOutput {\n  var output : BlendSrcOutput;\n  output.color = i32();\n  output.blend = i32();\n  return output;\n}\n"},
+    {"params":{"blendSrc0Type":"u32","blendSrc1Type":"u32"},"code":"\nenable dual_source_blending;\n\n\n\nstruct BlendSrcOutput {\n  @location(0) @blend_src(0) color : u32,\n  @location(0) @blend_src(1) blend : u32,\n}\n\n@fragment fn main() -> BlendSrcOutput {\n  var output : BlendSrcOutput;\n  output.color = u32();\n  output.blend = u32();\n  return output;\n}\n"},
+    {"params":{"blendSrc0Type":"vec2h","blendSrc1Type":"vec2h"},"code":"\nenable dual_source_blending;\n\nenable f16;\n\nstruct BlendSrcOutput {\n  @location(0) @blend_src(0) color : vec2h,\n  @location(0) @blend_src(1) blend : vec2h,\n}\n\n@fragment fn main() -> BlendSrcOutput {\n  var output : BlendSrcOutput;\n  output.color = vec2h();\n  output.blend = vec2h();\n  return output;\n}\n"},
+    {"params":{"blendSrc0Type":"vec2f","blendSrc1Type":"vec2f"},"code":"\nenable dual_source_blending;\n\n\n\nstruct BlendSrcOutput {\n  @location(0) @blend_src(0) color : vec2f,\n  @location(0) @blend_src(1) blend : vec2f,\n}\n\n@fragment fn main() -> BlendSrcOutput {\n  var output : BlendSrcOutput;\n  output.color = vec2f();\n  output.blend = vec2f();\n  return output;\n}\n"},
+    {"params":{"blendSrc0Type":"vec2u","blendSrc1Type":"vec2u"},"code":"\nenable dual_source_blending;\n\n\n\nstruct BlendSrcOutput {\n  @location(0) @blend_src(0) color : vec2u,\n  @location(0) @blend_src(1) blend : vec2u,\n}\n\n@fragment fn main() -> BlendSrcOutput {\n  var output : BlendSrcOutput;\n  output.color = vec2u();\n  output.blend = vec2u();\n  return output;\n}\n"},
+    {"params":{"blendSrc0Type":"vec3h","blendSrc1Type":"vec3h"},"code":"\nenable dual_source_blending;\n\nenable f16;\n\nstruct BlendSrcOutput {\n  @location(0) @blend_src(0) color : vec3h,\n  @location(0) @blend_src(1) blend : vec3h,\n}\n\n@fragment fn main() -> BlendSrcOutput {\n  var output : BlendSrcOutput;\n  output.color = vec3h();\n  output.blend = vec3h();\n  return output;\n}\n"},
+    {"params":{"blendSrc0Type":"vec3f","blendSrc1Type":"vec3f"},"code":"\nenable dual_source_blending;\n\n\n\nstruct BlendSrcOutput {\n  @location(0) @blend_src(0) color : vec3f,\n  @location(0) @blend_src(1) blend : vec3f,\n}\n\n@fragment fn main() -> BlendSrcOutput {\n  var output : BlendSrcOutput;\n  output.color = vec3f();\n  output.blend = vec3f();\n  return output;\n}\n"},
+    {"params":{"blendSrc0Type":"vec3i","blendSrc1Type":"vec3i"},"code":"\nenable dual_source_blending;\n\n\n\nstruct BlendSrcOutput {\n  @location(0) @blend_src(0) color : vec3i,\n  @location(0) @blend_src(1) blend : vec3i,\n}\n\n@fragment fn main() -> BlendSrcOutput {\n  var output : BlendSrcOutput;\n  output.color = vec3i();\n  output.blend = vec3i();\n  return output;\n}\n"},
+    {"params":{"blendSrc0Type":"vec3u","blendSrc1Type":"vec3u"},"code":"\nenable dual_source_blending;\n\n\n\nstruct BlendSrcOutput {\n  @location(0) @blend_src(0) color : vec3u,\n  @location(0) @blend_src(1) blend : vec3u,\n}\n\n@fragment fn main() -> BlendSrcOutput {\n  var output : BlendSrcOutput;\n  output.color = vec3u();\n  output.blend = vec3u();\n  return output;\n}\n"},
+    {"params":{"blendSrc0Type":"vec4h","blendSrc1Type":"vec4h"},"code":"\nenable dual_source_blending;\n\nenable f16;\n\nstruct BlendSrcOutput {\n  @location(0) @blend_src(0) color : vec4h,\n  @location(0) @blend_src(1) blend : vec4h,\n}\n\n@fragment fn main() -> BlendSrcOutput {\n  var output : BlendSrcOutput;\n  output.color = vec4h();\n  output.blend = vec4h();\n  return output;\n}\n"},
+    {"params":{"blendSrc0Type":"vec4f","blendSrc1Type":"vec4f"},"code":"\nenable dual_source_blending;\n\n\n\nstruct BlendSrcOutput {\n  @location(0) @blend_src(0) color : vec4f,\n  @location(0) @blend_src(1) blend : vec4f,\n}\n\n@fragment fn main() -> BlendSrcOutput {\n  var output : BlendSrcOutput;\n  output.color = vec4f();\n  output.blend = vec4f();\n  return output;\n}\n"},
+    {"params":{"blendSrc0Type":"vec4u","blendSrc1Type":"vec4u"},"code":"\nenable dual_source_blending;\n\n\n\nstruct BlendSrcOutput {\n  @location(0) @blend_src(0) color : vec4u,\n  @location(0) @blend_src(1) blend : vec4u,\n}\n\n@fragment fn main() -> BlendSrcOutput {\n  var output : BlendSrcOutput;\n  output.color = vec4u();\n  output.blend = vec4u();\n  return output;\n}\n"}
+   ]
+  },
+  "extension/pointer_composite_access": {
+   "total": 28,
+   "unique": 28,
+   "shaders": [
+    {"params":{"case":"array_index_access_via_identifier"},"code":"\n    \n    fn f() {\n        var a = array<i32, 3>();\n        let p = &a;\n        let r = (*(&a))[0];\n    }"},
+    {"params":{"case":"vector_index_access_via_identifier"},"code":"\n    \n    fn f() {\n        var a = vec3<i32>();\n        let p = &a;\n        let r = (*(&a))[0];\n    }"},
+    {"params":{"case":"vector_member_access_via_identifier"},"code":"\n    \n    fn f() {\n        var a = vec3<i32>();\n        let p = &a;\n        let r = (*(&a)).x;\n    }"},
+    {"params":{"case":"matrix_index_access_via_identifier"},"code":"\n    \n    fn f() {\n        var a = mat2x3<f32>();\n        let p = &a;\n        let r = (*(&a))[0];\n    }"},
+    {"params":{"case":"struct_member_access_via_identifier"},"code":"\n    struct S { a : i32, }\n    fn f() {\n        var a = S();\n        let p = &a;\n        let r = (*(&a)).a;\n    }"},
+    {"params":{"case":"builtin_struct_modf_via_identifier"},"code":"\n    \n    fn f() {\n        var a = modf(1.5);\n        let p = &a;\n        let r = vec2((*(&a)).fract, (*(&a)).whole);\n    }"},
+    {"params":{"case":"builtin_struct_frexp_via_identifier"},"code":"\n    \n    fn f() {\n        var a = frexp(1.5);\n        let p = &a;\n        let r = vec2((*(&a)).fract, f32((*(&a)).exp));\n    }"},
+    {"params":{"case":"vector_index_access_via_pointer"},"code":"\n    \n    fn f() {\n        var a = vec3<i32>();\n        let p = &a;\n        let r = (*p)[0];\n    }"},
+    {"params":{"case":"vector_member_access_via_pointer"},"code":"\n    \n    fn f() {\n        var a = vec3<i32>();\n        let p = &a;\n        let r = (*p).x;\n    }"},
+    {"params":{"case":"matrix_index_access_via_pointer"},"code":"\n    \n    fn f() {\n        var a = mat2x3<f32>();\n        let p = &a;\n        let r = (*p)[0];\n    }"},
+    {"params":{"case":"struct_member_access_via_pointer"},"code":"\n    struct S { a : i32, }\n    fn f() {\n        var a = S();\n        let p = &a;\n        let r = (*p).a;\n    }"},
+    {"params":{"case":"builtin_struct_modf_via_pointer"},"code":"\n    \n    fn f() {\n        var a = modf(1.5);\n        let p = &a;\n        let r = vec2((*p).fract, (*p).whole);\n    }"},
+    {"params":{"case":"builtin_struct_frexp_via_pointer"},"code":"\n    \n    fn f() {\n        var a = frexp(1.5);\n        let p = &a;\n        let r = vec2((*p).fract, f32((*p).exp));\n    }"},
+    {"params":{"case":"array_index_access_via_identifier"},"code":"\n    \n    fn f() {\n        var a = array<i32, 3>();\n        let p = &a;\n        let r = (&a)[0];\n    }"},
+    {"params":{"case":"vector_member_access_via_identifier"},"code":"\n    \n    fn f() {\n        var a = vec3<i32>();\n        let p = &a;\n        let r = (&a).x;\n    }"},
+    {"params":{"case":"matrix_index_access_via_identifier"},"code":"\n    \n    fn f() {\n        var a = mat2x3<f32>();\n        let p = &a;\n        let r = (&a)[0];\n    }"},
+    {"params":{"case":"struct_member_access_via_identifier"},"code":"\n    struct S { a : i32, }\n    fn f() {\n        var a = S();\n        let p = &a;\n        let r = (&a).a;\n    }"},
+    {"params":{"case":"builtin_struct_modf_via_identifier"},"code":"\n    \n    fn f() {\n        var a = modf(1.5);\n        let p = &a;\n        let r = vec2((&a).fract, (&a).whole);\n    }"},
+    {"params":{"case":"array_index_access_via_pointer"},"code":"\n    \n    fn f() {\n        var a = array<i32, 3>();\n        let p = &a;\n        let r = p[0];\n    }"},
+    {"params":{"case":"vector_index_access_via_pointer"},"code":"\n    \n    fn f() {\n        var a = vec3<i32>();\n        let p = &a;\n        let r = p[0];\n    }"},
+    {"params":{"case":"vector_member_access_via_pointer"},"code":"\n    \n    fn f() {\n        var a = vec3<i32>();\n        let p = &a;\n        let r = p.x;\n    }"},
+    {"params":{"case":"matrix_index_access_via_pointer"},"code":"\n    \n    fn f() {\n        var a = mat2x3<f32>();\n        let p = &a;\n        let r = p[0];\n    }"},
+    {"params":{"case":"struct_member_access_via_pointer"},"code":"\n    struct S { a : i32, }\n    fn f() {\n        var a = S();\n        let p = &a;\n        let r = p.a;\n    }"},
+    {"params":{"case":"builtin_struct_modf_via_pointer"},"code":"\n    \n    fn f() {\n        var a = modf(1.5);\n        let p = &a;\n        let r = vec2(p.fract, p.whole);\n    }"},
+    {"params":{"case":"builtin_struct_frexp_via_pointer"},"code":"\n    \n    fn f() {\n        var a = frexp(1.5);\n        let p = &a;\n        let r = vec2(p.fract, f32(p.exp));\n    }"}
+   ]
+  },
+  "extension/readonly_and_readwrite_storage_textures": {
+   "total": 481,
+   "unique": 481,
+   "shaders": [
+    {"params":{"type":"texture_storage_1d","format":"r16unorm","access":"read"},"code":"@group(0) @binding(0) var t : texture_storage_1d<r16unorm, read>;"},
+    {"params":{"type":"texture_storage_1d","format":"rgba16sint","access":"read"},"code":"@group(0) @binding(0) var t : texture_storage_1d<rgba16sint, read>;"},
+    {"params":{"type":"texture_storage_1d","format":"r32float","access":"write"},"code":"@group(0) @binding(0) var t : texture_storage_1d<r32float, write>;"},
+    {"params":{"type":"texture_storage_1d","format":"bgra8unorm","access":"write"},"code":"@group(0) @binding(0) var t : texture_storage_1d<bgra8unorm, write>;"},
+    {"params":{"type":"texture_storage_1d","format":"rg8uint","access":"write"},"code":"@group(0) @binding(0) var t : texture_storage_1d<rg8uint, write>;"},
+    {"params":{"type":"texture_storage_1d","format":"r16float","access":"read_write"},"code":"@group(0) @binding(0) var t : texture_storage_1d<r16float, read_write>;"},
+    {"params":{"type":"texture_storage_2d","format":"rgba8unorm","access":"read_write"},"code":"@group(0) @binding(0) var t : texture_storage_2d<rgba8unorm, read_write>;"},
+    {"params":{"type":"texture_storage_2d","format":"rgba16float","access":"read"},"code":"@group(0) @binding(0) var t : texture_storage_2d<rgba16float, read>;"},
+    {"params":{"type":"texture_storage_2d","format":"rgba32uint","access":"read"},"code":"@group(0) @binding(0) var t : texture_storage_2d<rgba32uint, read>;"},
+    {"params":{"type":"texture_storage_2d","format":"r8unorm","access":"write"},"code":"@group(0) @binding(0) var t : texture_storage_2d<r8unorm, write>;"},
+    {"params":{"type":"texture_storage_2d","format":"rg8sint","access":"write"},"code":"@group(0) @binding(0) var t : texture_storage_2d<rg8sint, write>;"},
+    {"params":{"type":"texture_storage_2d","format":"rgb10a2uint","access":"write"},"code":"@group(0) @binding(0) var t : texture_storage_2d<rgb10a2uint, write>;"},
+    {"params":{"type":"texture_storage_2d_array","format":"rgba8snorm","access":"read_write"},"code":"@group(0) @binding(0) var t : texture_storage_2d_array<rgba8snorm, read_write>;"},
+    {"params":{"type":"texture_storage_2d_array","format":"rgba16unorm","access":"read_write"},"code":"@group(0) @binding(0) var t : texture_storage_2d_array<rgba16unorm, read_write>;"},
+    {"params":{"type":"texture_storage_2d_array","format":"r32uint","access":"read"},"code":"@group(0) @binding(0) var t : texture_storage_2d_array<r32uint, read>;"},
+    {"params":{"type":"texture_storage_2d_array","format":"rgba32sint","access":"read"},"code":"@group(0) @binding(0) var t : texture_storage_2d_array<rgba32sint, read>;"},
+    {"params":{"type":"texture_storage_2d_array","format":"rg8unorm","access":"read"},"code":"@group(0) @binding(0) var t : texture_storage_2d_array<rg8unorm, read>;"},
+    {"params":{"type":"texture_storage_2d_array","format":"r16uint","access":"write"},"code":"@group(0) @binding(0) var t : texture_storage_2d_array<r16uint, write>;"},
+    {"params":{"type":"texture_storage_2d_array","format":"rgb10a2unorm","access":"write"},"code":"@group(0) @binding(0) var t : texture_storage_2d_array<rgb10a2unorm, write>;"},
+    {"params":{"type":"texture_storage_3d","format":"rgba16snorm","access":"read_write"},"code":"@group(0) @binding(0) var t : texture_storage_3d<rgba16snorm, read_write>;"},
+    {"params":{"type":"texture_storage_3d","format":"rg32uint","access":"read_write"},"code":"@group(0) @binding(0) var t : texture_storage_3d<rg32uint, read_write>;"},
+    {"params":{"type":"texture_storage_3d","format":"rgba32float","access":"read"},"code":"@group(0) @binding(0) var t : texture_storage_3d<rgba32float, read>;"},
+    {"params":{"type":"texture_storage_3d","format":"rg8snorm","access":"read"},"code":"@group(0) @binding(0) var t : texture_storage_3d<rg8snorm, read>;"},
+    {"params":{"type":"texture_storage_3d","format":"rg16sint","access":"read"},"code":"@group(0) @binding(0) var t : texture_storage_3d<rg16sint, read>;"},
+    {"params":{"type":"texture_storage_3d","format":"rg11b10ufloat","access":"write"},"code":"@group(0) @binding(0) var t : texture_storage_3d<rg11b10ufloat, write>;"}
+   ]
+  }
+ }
+}
