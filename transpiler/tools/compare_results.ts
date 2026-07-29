@@ -3,7 +3,7 @@
  * Compare CTS test results between baseline and transpiled runs.
  *
  * Usage:
- *   transpiler/tools/compare_results.ts baseline.json transpiled.json
+ *   transpiler/tools/compare_results.ts [--ignore-file path] baseline.json transpiled.json
  */
 
 import * as fs from 'fs';
@@ -17,9 +17,7 @@ interface TestResult {
 
 function hasParseError(result: TestResult): boolean {
   if (!result.logs) return false;
-  return result.logs.some(log =>
-    JSON.stringify(log).includes(TRANSPILER_PARSE_ERROR_MARKER)
-  );
+  return result.logs.some(log => JSON.stringify(log).includes(TRANSPILER_PARSE_ERROR_MARKER));
 }
 
 interface CTSResults {
@@ -50,14 +48,24 @@ function loadResults(filepath: string): Map<string, TestResult> {
 
 function compareResults(
   baseline: Map<string, TestResult>,
-  transpiled: Map<string, TestResult>
+  transpiled: Map<string, TestResult>,
+  ignoredTests: Set<string>
 ): void {
   const baselineTests = new Set(baseline.keys());
   const transpiledTests = new Set(transpiled.keys());
+  const ignored = new Set<string>();
 
   // Check for mismatched tests
-  const onlyBaseline = [...baselineTests].filter(t => !transpiledTests.has(t));
-  const onlyTranspiled = [...transpiledTests].filter(t => !baselineTests.has(t));
+  const onlyBaseline = filterIgnored(
+    [...baselineTests].filter(t => !transpiledTests.has(t)),
+    ignoredTests,
+    ignored
+  );
+  const onlyTranspiled = filterIgnored(
+    [...transpiledTests].filter(t => !baselineTests.has(t)),
+    ignoredTests,
+    ignored
+  );
 
   if (onlyBaseline.length > 0) {
     console.log(`Warning: ${onlyBaseline.length} tests only in baseline`);
@@ -100,6 +108,15 @@ function compareResults(
     }
   }
 
+  const unexpectedParseErrors = filterIgnored(parseErrors, ignoredTests, ignored);
+  const unexpectedMistranslations = filterIgnored(mistranslations, ignoredTests, ignored);
+  const unexpectedTooPermissive = filterIgnored(tooPermissive, ignoredTests, ignored);
+  const unexpectedOtherDiff = otherDiff.filter(([test]) => {
+    if (!ignoredTests.has(test)) return true;
+    ignored.add(test);
+    return false;
+  });
+
   // Print summary
   const total = commonTests.length;
   console.log(`\n** Comparison Summary **`);
@@ -109,63 +126,106 @@ function compareResults(
   console.log(`Both skip:            ${bothSkip}`);
   console.log();
 
-  if (parseErrors.length > 0) {
-    console.log(`** Parse Errors (${parseErrors.length}) **`);
+  if (unexpectedParseErrors.length > 0) {
+    console.log(`** Parse Errors (${unexpectedParseErrors.length}) **`);
     console.log(`(Transpiler failed to parse valid WGSL)`);
-    for (const test of parseErrors) {
+    for (const test of unexpectedParseErrors) {
       console.log(`  ${test}`);
     }
     console.log();
   }
 
-  if (mistranslations.length > 0) {
-    console.log(`** Mistranslations (${mistranslations.length}) **`);
+  if (unexpectedMistranslations.length > 0) {
+    console.log(`** Mistranslations (${unexpectedMistranslations.length}) **`);
     console.log(`(Transpiler produced invalid output from valid input)`);
-    for (const test of mistranslations) {
+    for (const test of unexpectedMistranslations) {
       console.log(`  ${test}`);
     }
     console.log();
   }
 
-  if (tooPermissive.length > 0) {
-    console.log(`** Too Permissive (${tooPermissive.length}) **`);
+  if (unexpectedTooPermissive.length > 0) {
+    console.log(`** Too Permissive (${unexpectedTooPermissive.length}) **`);
     console.log(`(Transpiler accepts/transforms invalid code into valid code)`);
-    for (const test of tooPermissive) {
+    for (const test of unexpectedTooPermissive) {
       console.log(`  ${test}`);
     }
     console.log();
   }
 
-  if (otherDiff.length > 0) {
-    console.log(`** Other Differences (${otherDiff.length}) **`);
-    for (const [test, b, t] of otherDiff) {
+  if (unexpectedOtherDiff.length > 0) {
+    console.log(`** Other Differences (${unexpectedOtherDiff.length}) **`);
+    for (const [test, b, t] of unexpectedOtherDiff) {
       console.log(`  ${test}: ${b} -> ${t}`);
+    }
+    console.log();
+  }
+
+  if (ignored.size > 0) {
+    console.log(`** Known Divergences (${ignored.size}, ignored) **`);
+    console.log(`(Excluded from issue counts and exit status)`);
+    for (const test of [...ignored].sort()) {
+      console.log(`  ${test}`);
     }
     console.log();
   }
 
   // Final summary
   console.log(`** Transpiler Issues **`);
-  console.log(`  parse-errors:    ${parseErrors.length} (Transpiler can't parse valid WGSL)`);
-  console.log(`  mistranslations: ${mistranslations.length} (Transpiler produces invalid output)`);
-  console.log(`  too-permissive:  ${tooPermissive.length} (Transpiler accepts what baseline rejects)`);
+  console.log(
+    `  parse-errors:    ${unexpectedParseErrors.length} (Transpiler can't parse valid WGSL)`
+  );
+  console.log(
+    `  mistranslations: ${unexpectedMistranslations.length} (Transpiler produces invalid output)`
+  );
+  console.log(
+    `  too-permissive:  ${unexpectedTooPermissive.length} (Transpiler accepts what baseline rejects)`
+  );
 
   // Exit with error if there are issues
-  if (parseErrors.length > 0 || mistranslations.length > 0) {
+  if (unexpectedParseErrors.length > 0 || unexpectedMistranslations.length > 0) {
     process.exit(1);
   }
   process.exit(0);
 }
 
+function filterIgnored(tests: string[], ignoredTests: Set<string>, ignored: Set<string>): string[] {
+  return tests.filter(test => {
+    if (!ignoredTests.has(test)) return true;
+    ignored.add(test);
+    return false;
+  });
+}
+
+function loadIgnoredTests(filepath: string): Set<string> {
+  const lines = fs.readFileSync(filepath, 'utf-8').split(/\r?\n/);
+  return new Set(lines.map(line => line.trim()).filter(line => line && !line.startsWith('#')));
+}
+
 function main(): void {
   const args = process.argv.slice(2);
+  const paths: string[] = [];
+  let ignoredTests = new Set<string>();
 
-  if (args.length !== 2) {
-    console.log(`Usage: npx ts-node compare_results.ts baseline.json transpiled.json`);
-    process.exit(1);
+  for (let i = 0; i < args.length; i++) {
+    if (args[i] !== '--ignore-file') {
+      paths.push(args[i]);
+      continue;
+    }
+    const ignoreFile = args[++i];
+    if (!ignoreFile) usageError();
+    ignoredTests = new Set([...ignoredTests, ...loadIgnoredTests(ignoreFile)]);
   }
 
-  const [baselinePath, transpiledPath] = args;
+  if (paths.length !== 2) {
+    usageError();
+  }
+
+  const [baselinePath, transpiledPath] = paths;
+
+  if (!baselinePath || !transpiledPath) {
+    usageError();
+  }
 
   console.log(`Loading baseline: ${baselinePath}`);
   const baseline = loadResults(baselinePath);
@@ -173,7 +233,14 @@ function main(): void {
   console.log(`Loading transpiled: ${transpiledPath}`);
   const transpiled = loadResults(transpiledPath);
 
-  compareResults(baseline, transpiled);
+  compareResults(baseline, transpiled, ignoredTests);
+}
+
+function usageError(): never {
+  console.log(
+    `Usage: npx ts-node compare_results.ts [--ignore-file path] baseline.json transpiled.json`
+  );
+  process.exit(1);
 }
 
 main();
