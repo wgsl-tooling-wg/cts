@@ -1,0 +1,15 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "allowImportingTsExtensions": true,
+    "rootDir": "..",
+    "types": [
+      "@types/dom-mediacapture-transform",
+      "@webgpu/types",
+      "@types/jquery",
+      "@types/w3c-image-capture",
+      "node"
+    ]
+  },
+  "include": ["**/*.ts"]
+}
